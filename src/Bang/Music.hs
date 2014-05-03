@@ -16,7 +16,7 @@ import Control.Monad.Free
 import System.MIDI
 
 rest :: Composition ()
-rest  = liftF $ (Rest 1) ()
+rest  = liftF $ (Rest 32) ()
 r  = rest
 rt d = liftF (Rest d) ()
 
@@ -32,6 +32,15 @@ mapDelayF f (Free x) = case x of
   (MDrum dr d a) -> Free (MDrum dr (f d) $ mapDelayF f a)
   (Rest d a)     -> Free (Rest (f d) $ mapDelayF f a)
   End            -> return ()
+
+
+speedDiv :: Delay -> Composition r -> Composition ()
+speedDiv x = mapDelayF (`div` x)
+
+half     = speedDiv 2
+quarter   = speedDiv 4
+eighth    = speedDiv 8
+sixteenth = speedDiv 16
 
 foldDelayF :: (Delay -> Delay -> Delay) -> Delay -> Composition r -> Composition ()
 foldDelayF f acc (Pure r) = Pure ()
@@ -54,7 +63,7 @@ nextBeat (Free (MDrum dr d a)) = a
 nextBeat (Free (Rest d a))     = a
 
 bpm :: Integer -> Composition r -> Composition ()
-bpm x song = foldDelayF (+) 0 $ mapDelayF (* (60000 `div` x)) song
+bpm x song = foldDelayF (+) 0 $ mapDelayF (* (1875 `div` x)) song
 
 concurrent :: Composition r -> Composition r -> Composition ()
 concurrent m n = m >> mapDelayF (*0) n

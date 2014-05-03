@@ -7,17 +7,17 @@ import System.MIDI
 
 -- Beats!
 snare, bass :: Composition ()
-snare = liftF $ (MDrum Snare 1) ()
-bass  = liftF $ (MDrum Bass 1) ()
+snare = liftF $ (MDrum Snare 32) ()
+bass  = liftF $ (MDrum Bass 32) ()
 
 tom :: TomType -> Composition ()
-tom t = liftF $ (MDrum (Tom t) 1) ()
+tom t = liftF $ (MDrum (Tom t) 32) ()
 
 cymbal :: CymbalType -> Composition ()
-cymbal c = liftF $ (MDrum (Cymbal c) 1) ()
+cymbal c = liftF $ (MDrum (Cymbal c) 32) ()
 
 hiHat :: Bool -> Composition ()
-hiHat open = liftF $ (MDrum (HiHat open) 1) ()
+hiHat open = liftF $ (MDrum (HiHat open) 32) ()
 
 -- Short names
 sn = snare
