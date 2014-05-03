@@ -6,10 +6,11 @@ import Bang.Interface.MDrum
 import qualified System.MacOSX.CoreMIDI as OSX
 import System.MIDI
 
-basic :: Composition ()
-basic = s1 <&> s2
-  where s1 = 300 <>> hc
-        s2 = 300 <>> b % r % sn % r
+import Control.Monad
+
+comp = (400 <>> (cc & hc & b) % b % b % hc % b % b)
+       <&> 
+       (400 <>> cc % replicateM_ 3 r)
 
 main :: IO ()
 main = do
@@ -20,4 +21,4 @@ main = do
       name    <- getName dst
       putStrLn $ "Using MIDI device: " ++ name
       conn    <- openDestination dst
-      play conn basic
+      play conn comp

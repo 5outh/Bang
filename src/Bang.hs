@@ -1,6 +1,14 @@
 {-# LANGUAGE DeriveFunctor, NoMonomorphismRestriction #-}
 
-module Bang where
+module Bang(
+  play,
+  playIO,
+  runComposition,
+  module Bang.Music,
+  module Bang.Music.MDrum,
+  module Bang.Interface.MDrum,
+  module Bang.Operators
+)where
 
 import Control.Monad
 import Control.Monad.Free
@@ -13,6 +21,7 @@ import System.MIDI
 import Bang.Music
 import Bang.Music.MDrum
 import Bang.Interface.MDrum
+import Bang.Operators
 
 play :: Connection -> Composition () -> IO ()
 play conn c = do
@@ -34,7 +43,17 @@ runComposition = do
           Rest d a -> return ()
           m@(MDrum _ _ _) -> do
             let MidiEvent s ev = drumToMidiEvent m
-            lift $ print (MidiEvent s ev)
             lift $ send conn ev
-      lift $ threadDelay 1000
+      lift $ threadDelay 500
       runComposition
+
+playIO :: Composition () -> IO ()
+playIO song = do
+  dstlist <- enumerateDestinations
+  case dstlist of 
+    [] -> fail "No MIDI Devices found."
+    (dst:_) -> do
+      name    <- getName dst
+      putStrLn $ "Using MIDI device: " ++ name
+      conn    <- openDestination dst
+      play conn song
