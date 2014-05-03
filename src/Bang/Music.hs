@@ -9,6 +9,7 @@ module Bang.Music (
   rest, r, rt,
   half, quarter, sixteenth, thirtysecond,
   sh, sq, se, sts, sp,
+  rev, mirror,
   module Bang.Music.Class
 ) where
 
@@ -85,6 +86,14 @@ interleave a b = singleton minD >> interleave maxD (nextBeat minD)
   where (minD, maxD) = if delay (value a) <= delay (value b)
                        then (a, b) 
                        else (b, a)
+
+rev :: Composition () -> Composition ()
+rev (Pure r)   = return ()
+rev (Free End) = return ()
+rev f          = rev (nextBeat f) >> singleton f
+
+mirror :: Composition () -> Composition ()
+mirror f = f >> rev f
 
 midiEvent :: Delay -> Int -> MidiEvent
 midiEvent d instrument = MidiEvent (fromIntegral d) (MidiMessage 10 (NoteOn instrument 64))
