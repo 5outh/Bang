@@ -7,8 +7,11 @@ module Bang.Music (
   midiEvent,
   nextBeat,
   rest, r, rt,
+  speedDiv, speedMult,
+  double, quad, oct,
+  dbl, qd, sm,
   half, quarter, sixteenth, thirtysecond,
-  sh, sq, se, sts, sp,
+  sh, sq, se, sts, sd,
   rev, mirror,
   module Bang.Music.Class
 ) where
@@ -39,18 +42,28 @@ mapDelayF f (Free x) = case x of
 speedDiv :: Delay -> Composition r -> Composition ()
 speedDiv x = mapDelayF (`div` x)
 
-half      = speedDiv 2
-quarter   = speedDiv 4
-eighth    = speedDiv 8
-sixteenth = speedDiv 16
+speedMult :: Delay -> Composition r -> Composition ()
+speedMult x = mapDelayF (*x)
+
+double = speedMult 2
+quad   = speedMult 4
+oct    = speedMult 8
+dbl    = double
+qd     = quad
+sm     = speedMult
+
+half         = speedDiv 2
+quarter      = speedDiv 4
+eighth       = speedDiv 8
+sixteenth    = speedDiv 16
 thirtysecond = speedDiv 32
 
-sh  = half
-sq  = quarter
-se  = eighth
-sx  = sixteenth
-sts = thirtysecond
-sp x = speedDiv x
+sh   = half
+sq   = quarter
+se   = eighth
+sx   = sixteenth
+sts  = thirtysecond
+sd   = speedDiv
 
 foldDelayF :: (Delay -> Delay -> Delay) -> Delay -> Composition r -> Composition ()
 foldDelayF f acc (Pure r) = Pure ()
