@@ -129,15 +129,31 @@ nextBeat (Free (Rest d a))     = a
 bpm :: Integer -> Composition r -> Composition ()
 bpm x song = foldDelayF (+) 0 $ mapDelayF (* (1875 `div` x)) song
 
--- |Run two `Composition`s simultaneously
+-- |Run two `Composition`s simultaneously and wait for the longer one to complete.
 concurrent :: Composition r -> Composition r -> Composition ()
-concurrent (Pure _) (Pure _) = return ()
-concurrent m (Pure r) = singleton m
-concurrent (Pure r) m = singleton m
-concurrent m n = do
-  singleton m
-  mapDelayF (*0) (singleton n)
-  concurrent (nextBeat m) (nextBeat n)
+concurrent (Pure _) (Pure _)     = return ()
+concurrent (Free End) (Free End) = return ()
+concurrent (Free End) (Pure _)   = return ()
+concurrent (Pure _) (Free End)   = return ()
+concurrent m (Pure r) = m >> return ()
+concurrent (Pure r) m = m >> return ()
+concurrent m (Free End) = m >> return ()
+concurrent (Free End) m = m >> return ()
+concurrent m@(Free x) n@(Free y) = do
+  let d  = delay x
+      d' = delay y
+  if d' < d then do
+    singleton m 
+    mapDelayF (*0) (singleton n)
+    concurrent (rt (d - d') >> nextBeat m) (nextBeat n)
+  else if d < d' then do 
+    singleton m 
+    mapDelayF (*0) (singleton n)
+    concurrent (nextBeat m) (rt (d' - d) >> nextBeat n)
+  else do
+    singleton m
+    mapDelayF (*0) (singleton n)
+    concurrent (nextBeat m) (nextBeat n) 
 
 -- |Interleave the beats of two `Composition`s
 interleave :: Composition r -> Composition r -> Composition ()
@@ -149,7 +165,7 @@ interleave a b = singleton minD >> interleave maxD (nextBeat minD)
                        then (a, b) 
                        else (b, a)
 
--- |Revese a `Composition`
+-- |Reverse a `Composition`
 rev :: Composition () -> Composition ()
 rev (Pure r)   = return ()
 rev (Free End) = return ()

@@ -45,6 +45,7 @@ runComposition = do
           Rest d a -> return ()
           m@(MDrum _ _ _) -> do
             let MidiEvent s ev = drumToMidiEvent m
+            lift $ print (MidiEvent s ev)
             lift $ send conn ev
       lift $ threadDelay 500
       runComposition
