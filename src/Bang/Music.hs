@@ -131,7 +131,12 @@ bpm x song = foldDelayF (+) 0 $ mapDelayF (* (1875 `div` x)) song
 
 -- |Run two `Composition`s simultaneously
 concurrent :: Composition r -> Composition r -> Composition ()
-concurrent m n = m >> mapDelayF (*0) n
+concurrent m (Pure r) = singleton m
+concurrent (Pure r) m = singleton m
+concurrent m n = do
+  singleton m
+  mapDelayF (*0) (singleton n)
+  concurrent (nextBeat m) (nextBeat n)
 
 -- |Interleave the beats of two `Composition`s
 interleave :: Composition r -> Composition r -> Composition ()
