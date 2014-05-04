@@ -4,6 +4,7 @@ module Bang.Music.MDrum(
   CymbalType(..)
 ) where
 
+-- |Data type representing cymbals
 data CymbalType = 
     Crash
   | Ride
@@ -12,12 +13,14 @@ data CymbalType =
   | Bell
     deriving (Show, Eq)
 
+-- |Data type representing tom drums
 data TomType = 
     Floor
   | Hang1
   | Hang2
     deriving (Show, Eq)
 
+-- |Data type representing a drum
 data Drum = 
     Snare
   | Bass

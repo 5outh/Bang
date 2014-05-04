@@ -23,12 +23,14 @@ import Bang.Music.MDrum
 import Bang.Interface.MDrum
 import Bang.Operators
 
+-- |`play` a `Composition` over a given `Connection`
 play :: Connection -> Composition () -> IO ()
 play conn c = do
   start conn
   evalStateT runComposition (conn, c)
   close conn
 
+-- |Run a `Composition` by repeatedly updating the `Connection` and sending events as they come.
 runComposition :: StateT (Connection, Composition ()) IO ()
 runComposition = do
   (conn, evs) <- get
@@ -47,6 +49,7 @@ runComposition = do
       lift $ threadDelay 500
       runComposition
 
+-- |Play a `Composition` over the first system `Destination` for MIDI events
 playIO :: Composition () -> IO ()
 playIO song = do
   dstlist <- enumerateDestinations
