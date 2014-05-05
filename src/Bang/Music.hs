@@ -3,6 +3,7 @@
 module Bang.Music (
   bpm,
   concurrent,
+  subConcurrent,
   interleave,
   midiEvent,
   nextBeat,
@@ -153,7 +154,43 @@ concurrent m@(Free x) n@(Free y) = do
   else do
     singleton m
     mapDelayF (*0) (singleton n)
-    concurrent (nextBeat m) (nextBeat n) 
+    concurrent (nextBeat m) (nextBeat n)
+
+{-|Subtractive concurrent merging of `Composition`s. 
+  Where a `Rest` is present in one signal, a `Rest` is placed into the other.
+-}
+subConcurrent :: Composition r -> Composition r -> Composition ()
+subConcurrent (Pure _) (Pure _)     = return ()
+subConcurrent (Free End) (Free End) = return ()
+subConcurrent (Free End) (Pure _)   = return ()
+subConcurrent (Pure _) (Free End)   = return ()
+subConcurrent m (Pure r)            = m >> return ()
+subConcurrent (Pure r) m            = m >> return ()
+subConcurrent m (Free End)          = m >> return ()
+subConcurrent (Free End) m          = m >> return ()
+subConcurrent m@(Free (Rest d a)) n@(Free x) = go (delay x)
+  where go d' | d' < d    = singleton m >> subConcurrent (rt (d - d') >> nextBeat m) (nextBeat n)
+              | d < d'    = singleton m >> subConcurrent (nextBeat m) (rt (d' - d) >> nextBeat n)
+              | otherwise = singleton m >> subConcurrent (nextBeat m) (nextBeat n)
+subConcurrent n@(Free x) m@(Free (Rest d a)) = go (delay x)
+  where go d' | d' < d    = singleton m >> subConcurrent (rt (d - d') >> nextBeat m) (nextBeat n)
+              | d < d'    = singleton m >> subConcurrent (nextBeat m) (rt (d' - d) >> nextBeat n)
+              | otherwise = singleton m >> subConcurrent (nextBeat m) (nextBeat n)
+subConcurrent m@(Free x) n@(Free y) = do
+  let d  = delay x
+      d' = delay y
+  if d' < d then do
+    singleton m 
+    mapDelayF (*0) (singleton n)
+    subConcurrent (rt (d - d') >> nextBeat m) (nextBeat n)
+  else if d < d' then do 
+    singleton n 
+    mapDelayF (*0) (singleton m)
+    subConcurrent (nextBeat m) (rt (d' - d) >> nextBeat n)
+  else do
+    singleton m
+    mapDelayF (*0) (singleton n)
+    subConcurrent (nextBeat m) (nextBeat n)
 
 -- |Interleave the beats of two `Composition`s
 interleave :: Composition r -> Composition r -> Composition ()
