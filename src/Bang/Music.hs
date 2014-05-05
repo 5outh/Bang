@@ -135,10 +135,10 @@ concurrent (Pure _) (Pure _)     = return ()
 concurrent (Free End) (Free End) = return ()
 concurrent (Free End) (Pure _)   = return ()
 concurrent (Pure _) (Free End)   = return ()
-concurrent m (Pure r) = m >> return ()
-concurrent (Pure r) m = m >> return ()
-concurrent m (Free End) = m >> return ()
-concurrent (Free End) m = m >> return ()
+concurrent m (Pure r)            = m >> return ()
+concurrent (Pure r) m            = m >> return ()
+concurrent m (Free End)          = m >> return ()
+concurrent (Free End) m          = m >> return ()
 concurrent m@(Free x) n@(Free y) = do
   let d  = delay x
       d' = delay y
@@ -147,8 +147,8 @@ concurrent m@(Free x) n@(Free y) = do
     mapDelayF (*0) (singleton n)
     concurrent (rt (d - d') >> nextBeat m) (nextBeat n)
   else if d < d' then do 
-    singleton m 
-    mapDelayF (*0) (singleton n)
+    singleton n 
+    mapDelayF (*0) (singleton m)
     concurrent (nextBeat m) (rt (d' - d) >> nextBeat n)
   else do
     singleton m
