@@ -1,7 +1,7 @@
 Bang
 ====
 
-An *E*mbedded *D*omain *s*pecific *L*anguage for wwriting drum machine patterns in Haskell.
+An <b>E</b>mbedded <b>D</b>omain <b>S</b>pecific <b>L</b>anguage for writing drum machine patterns in Haskell.
 
 Todos:
 - Move notes to rational durations
