@@ -8,5 +8,5 @@ complex = playIO $ 240 <>> mirror $ do
     sn
     quad $ 4 $> hc & bd
     sn & ho
-    (bass & ch)
+    bass & ch
   double $ 3 $> ((sn & hc) >> bd >> (sn & ho))
