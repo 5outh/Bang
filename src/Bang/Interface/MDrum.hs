@@ -4,25 +4,26 @@ import Bang.Music
 import Bang.Music.MDrum
 import Control.Monad.Free
 import System.MIDI
+import Data.Ratio
 
 snare, bass :: Composition ()
 -- |A single snare drum beat
-snare = liftF $ (MDrum Snare 32) ()
+snare = liftF $ (MDrum Snare (1 % 4)) ()
 
 -- |A single bass drum beat
-bass  = liftF $ (MDrum Bass 32) ()
+bass  = liftF $ (MDrum Bass (1 % 4)) ()
 
 -- |A single tom drum beat, with a given `TomType`
 tom :: TomType -> Composition ()
-tom t = liftF $ (MDrum (Tom t) 32) ()
+tom t = liftF $ (MDrum (Tom t) (1 % 4)) ()
 
 -- |A single cymbal hit, with a given `CymbalType`
 cymbal :: CymbalType -> Composition ()
-cymbal c = liftF $ (MDrum (Cymbal c) 32) ()
+cymbal c = liftF $ (MDrum (Cymbal c) (1 % 4)) ()
 
 -- |A single hi-hat hit, either open or closed
 hiHat :: Bool -> Composition ()
-hiHat open = liftF $ (MDrum (HiHat open) 32) ()
+hiHat open = liftF $ (MDrum (HiHat open) (1 % 4)) ()
 
 -- |Shorthand for `snare`
 sn = snare
@@ -91,9 +92,9 @@ playHiHat open d = midiEvent d $
 -- |Construct a `midiEvent` from a drum beat
 drumToMidiEvent :: Music a -> MidiEvent
 drumToMidiEvent (Rest d _) = error "No MIDI event associated with rests!"
-drumToMidiEvent (MDrum dr d _) = case dr of
-  HiHat open -> playHiHat open d
-  Cymbal c   -> playCymbal c d
-  Tom t      -> playTom t d
-  Bass       -> playBass d
-  Snare      -> playSnare d
+drumToMidiEvent (MDrum dr d _) = let d' = round d in case dr of
+  HiHat open -> playHiHat open d'
+  Cymbal c   -> playCymbal c d'
+  Tom t      -> playTom t d'
+  Bass       -> playBass d'
+  Snare      -> playSnare d'

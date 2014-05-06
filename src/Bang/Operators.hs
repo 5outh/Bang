@@ -1,6 +1,5 @@
 {-# LANGUAGE NoMonomorphismRestriction #-}
 module Bang.Operators(
-  (%),
   (&),
   (<&>),
   (<>>),
@@ -10,10 +9,6 @@ module Bang.Operators(
 
 import Control.Monad
 import Bang.Music
-
--- |Sequence `Composition`s
-infixl 1 %
-(%) = (>>)
 
 -- |Concurrently run two `Composition`s
 (&) = concurrent

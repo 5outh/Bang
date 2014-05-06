@@ -39,7 +39,7 @@ runComposition = do
     Pure _   -> return ()
     Free End -> return ()
     Free x   -> do
-      when (fromIntegral (delay x) < t) $ do
+      when (fromIntegral (round (dur x)) < t) $ do
         put (conn, nextBeat evs)
         case x of
           Rest d a -> return ()

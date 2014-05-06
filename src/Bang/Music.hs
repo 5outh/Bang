@@ -21,25 +21,26 @@ import Bang.Music.Class
 import Bang.Music.MDrum
 import Control.Monad.Free
 import System.MIDI
+import Data.Ratio
 
 -- |Rest for one beat.
 rest :: Composition ()
-rest  = liftF $ (Rest 32) ()
+rest  = liftF $ (Rest $ 1 % 4) ()
 
 -- |Shorthand for `rest`
 r = rest
 
 -- |Rest for a specified number of 32nd notes.
-rt :: Delay -> Composition ()
+rt :: Duration -> Composition ()
 rt d = liftF $ (Rest d) ()
 
-mapDelay :: (Delay -> Delay) -> Music r -> Music ()
+mapDelay :: (Duration -> Duration) -> Music r -> Music ()
 mapDelay _ End = End
 mapDelay f x = case x of
   (MDrum dr d a) -> MDrum dr (f d) ()
   (Rest d a)     -> Rest (f d) ()
 
-mapDelayF :: (Delay -> Delay) -> Composition r -> Composition ()
+mapDelayF :: (Duration -> Duration) -> Composition r -> Composition ()
 mapDelayF _ (Pure r) = return ()
 mapDelayF f (Free x) = case x of
   (MDrum dr d a) -> Free (MDrum dr (f d) $ mapDelayF f a)
@@ -47,11 +48,11 @@ mapDelayF f (Free x) = case x of
   End            -> return ()
 
 -- |Speed up by a factor of `x`
-speedDiv :: Delay -> Composition r -> Composition ()
-speedDiv x = mapDelayF (`div` x)
+speedDiv :: Duration -> Composition r -> Composition ()
+speedDiv x = mapDelayF (/x)
 
 -- |Slow down by a factor of `x`
-speedMult :: Delay -> Composition r -> Composition ()
+speedMult :: Duration -> Composition r -> Composition ()
 speedMult x = mapDelayF (*x)
 
 -- |double the speed of a `Composition`
@@ -105,11 +106,11 @@ sts  = thirtysecond
 -- |Shorthand for `speedMult`
 sm  = speedMult
 
-foldDelayF :: (Delay -> Delay -> Delay) -> Delay -> Composition r -> Composition ()
+foldDelayF :: (Duration -> Duration -> Duration) -> Duration -> Composition r -> Composition ()
 foldDelayF f acc (Pure r) = Pure ()
 foldDelayF f acc a@(Free x) = do
   liftF $ mapDelay (+acc) x
-  foldDelayF f (delay (value a) + acc) (nextBeat a)
+  foldDelayF f (dur (value a) + acc) (nextBeat a)
 
 value :: Composition r -> Music ()
 value (Pure _)              = End
@@ -126,10 +127,12 @@ nextBeat (Pure r)              = return r
 nextBeat (Free (MDrum dr d a)) = a
 nextBeat (Free (Rest d a))     = a
 
+-- | NOTE: Still a `Ratio`, so needs to be rounded when the time comes.
 -- |Set the beats per minute of a `Composition`
 bpm :: Integer -> Composition r -> Composition ()
-bpm x song = foldDelayF (+) 0 $ mapDelayF (* (1875 `div` x)) song
+bpm x song = foldDelayF (+) 0 $ mapDelayF (* (240000 % x)) song
 
+-- @TODO: Remove concurrent `Rests` to make this act normally with `subConcurrent`
 -- |Run two `Composition`s simultaneously and wait for the longer one to complete.
 concurrent :: Composition r -> Composition r -> Composition ()
 concurrent (Pure _) (Pure _)     = return ()
@@ -141,8 +144,8 @@ concurrent (Pure r) m            = m >> return ()
 concurrent m (Free End)          = m >> return ()
 concurrent (Free End) m          = m >> return ()
 concurrent m@(Free x) n@(Free y) = do
-  let d  = delay x
-      d' = delay y
+  let d  = dur x
+      d' = dur y
   if d' < d then do
     singleton m 
     mapDelayF (*0) (singleton n)
@@ -168,17 +171,17 @@ subConcurrent m (Pure r)            = m >> return ()
 subConcurrent (Pure r) m            = m >> return ()
 subConcurrent m (Free End)          = m >> return ()
 subConcurrent (Free End) m          = m >> return ()
-subConcurrent m@(Free (Rest d a)) n@(Free x) = go (delay x)
+subConcurrent m@(Free (Rest d a)) n@(Free x) = go (dur x)
   where go d' | d' < d    = singleton m >> subConcurrent (rt (d - d') >> nextBeat m) (nextBeat n)
               | d < d'    = singleton m >> subConcurrent (nextBeat m) (rt (d' - d) >> nextBeat n)
               | otherwise = singleton m >> subConcurrent (nextBeat m) (nextBeat n)
-subConcurrent n@(Free x) m@(Free (Rest d a)) = go (delay x)
+subConcurrent n@(Free x) m@(Free (Rest d a)) = go (dur x)
   where go d' | d' < d    = singleton m >> subConcurrent (rt (d - d') >> nextBeat m) (nextBeat n)
               | d < d'    = singleton m >> subConcurrent (nextBeat m) (rt (d' - d) >> nextBeat n)
               | otherwise = singleton m >> subConcurrent (nextBeat m) (nextBeat n)
 subConcurrent m@(Free x) n@(Free y) = do
-  let d  = delay x
-      d' = delay y
+  let d  = dur x
+      d' = dur y
   if d' < d then do
     singleton m 
     mapDelayF (*0) (singleton n)
@@ -198,7 +201,7 @@ interleave (Pure _) (Pure _) = return ()
 interleave (Pure r) x = singleton x
 interleave x (Pure r) = singleton x
 interleave a b = singleton minD >> interleave maxD (nextBeat minD)
-  where (minD, maxD) = if delay (value a) <= delay (value b)
+  where (minD, maxD) = if dur (value a) <= dur (value b)
                        then (a, b) 
                        else (b, a)
 
