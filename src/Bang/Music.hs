@@ -34,26 +34,26 @@ r = rest
 rt :: Duration -> Composition ()
 rt d = liftF $ (Rest d) ()
 
-mapDelay :: (Duration -> Duration) -> Music r -> Music ()
-mapDelay _ End = End
-mapDelay f x = case x of
+mapDuration :: (Duration -> Duration) -> Music r -> Music ()
+mapDuration _ End = End
+mapDuration f x = case x of
   (MDrum dr d a) -> MDrum dr (f d) ()
   (Rest d a)     -> Rest (f d) ()
 
-mapDelayF :: (Duration -> Duration) -> Composition r -> Composition ()
-mapDelayF _ (Pure r) = return ()
-mapDelayF f (Free x) = case x of
-  (MDrum dr d a) -> Free (MDrum dr (f d) $ mapDelayF f a)
-  (Rest d a)     -> Free (Rest (f d) $ mapDelayF f a)
+mapDurationF :: (Duration -> Duration) -> Composition r -> Composition ()
+mapDurationF _ (Pure r) = return ()
+mapDurationF f (Free x) = case x of
+  (MDrum dr d a) -> Free (MDrum dr (f d) $ mapDurationF f a)
+  (Rest d a)     -> Free (Rest (f d) $ mapDurationF f a)
   End            -> return ()
 
 -- |Speed up by a factor of `x`
 speedDiv :: Duration -> Composition r -> Composition ()
-speedDiv x = mapDelayF (/x)
+speedDiv x = mapDurationF (/x)
 
 -- |Slow down by a factor of `x`
 speedMult :: Duration -> Composition r -> Composition ()
-speedMult x = mapDelayF (*x)
+speedMult x = mapDurationF (*x)
 
 -- |double the speed of a `Composition`
 double = speedDiv 2
@@ -106,11 +106,11 @@ sts  = thirtysecond
 -- |Shorthand for `speedMult`
 sm  = speedMult
 
-foldDelayF :: (Duration -> Duration -> Duration) -> Duration -> Composition r -> Composition ()
-foldDelayF f acc (Pure r) = Pure ()
-foldDelayF f acc a@(Free x) = do
-  liftF $ mapDelay (+acc) x
-  foldDelayF f (dur (value a) + acc) (nextBeat a)
+foldDurationF :: (Duration -> Duration -> Duration) -> Duration -> Composition r -> Composition ()
+foldDurationF f acc (Pure r) = Pure ()
+foldDurationF f acc a@(Free x) = do
+  liftF $ mapDuration (+acc) x
+  foldDurationF f (dur (value a) + acc) (nextBeat a)
 
 value :: Composition r -> Music ()
 value (Pure _)              = End
@@ -130,7 +130,7 @@ nextBeat (Free (Rest d a))     = a
 -- | NOTE: Still a `Ratio`, so needs to be rounded when the time comes.
 -- |Set the beats per minute of a `Composition`
 bpm :: Integer -> Composition r -> Composition ()
-bpm x song = foldDelayF (+) 0 $ mapDelayF (* (240000 % x)) song
+bpm x song = foldDurationF (+) 0 $ mapDurationF (* (240000 % x)) song
 
 -- @TODO: Remove concurrent `Rests` to make this act normally with `subConcurrent`
 -- |Run two `Composition`s simultaneously and wait for the longer one to complete.
@@ -148,15 +148,15 @@ concurrent m@(Free x) n@(Free y) = do
       d' = dur y
   if d' < d then do
     singleton m 
-    mapDelayF (*0) (singleton n)
+    mapDurationF (*0) (singleton n)
     concurrent (rt (d - d') >> nextBeat m) (nextBeat n)
   else if d < d' then do 
     singleton n 
-    mapDelayF (*0) (singleton m)
+    mapDurationF (*0) (singleton m)
     concurrent (nextBeat m) (rt (d' - d) >> nextBeat n)
   else do
     singleton m
-    mapDelayF (*0) (singleton n)
+    mapDurationF (*0) (singleton n)
     concurrent (nextBeat m) (nextBeat n)
 
 {-|Subtractive concurrent merging of `Composition`s. 
@@ -184,15 +184,15 @@ subConcurrent m@(Free x) n@(Free y) = do
       d' = dur y
   if d' < d then do
     singleton m 
-    mapDelayF (*0) (singleton n)
+    mapDurationF (*0) (singleton n)
     subConcurrent (rt (d - d') >> nextBeat m) (nextBeat n)
   else if d < d' then do 
     singleton n 
-    mapDelayF (*0) (singleton m)
+    mapDurationF (*0) (singleton m)
     subConcurrent (nextBeat m) (rt (d' - d) >> nextBeat n)
   else do
     singleton m
-    mapDelayF (*0) (singleton n)
+    mapDurationF (*0) (singleton n)
     subConcurrent (nextBeat m) (nextBeat n)
 
 -- |Interleave the beats of two `Composition`s
