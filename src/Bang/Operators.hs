@@ -26,5 +26,5 @@ infixr 0 <>>
 x <>> m = bpm x $ forever $ m
 
 -- |Repeat a given `Composition` some number of times.
-infixr 1 $>
+infixr 0 $>
 ($>) = replicateM_ 

@@ -7,6 +7,11 @@ module Bang.Music (
   interleave,
   midiEvent,
   nextBeat,
+  withDuration,
+  foldDurationF,
+  mapDuration,
+  mapDurationF,
+  mergeF,
   rest, r, rt,
   speedDiv, speedMult,
   double, quad, oct,
@@ -34,6 +39,10 @@ r = rest
 rt :: Duration -> Composition ()
 rt d = liftF $ (Rest d) ()
 
+-- |Sets the duration for all notes in a `Composition`
+withDuration :: Duration -> Composition () -> Composition ()
+withDuration d = mapDurationF (const d)
+
 mapDuration :: (Duration -> Duration) -> Music r -> Music ()
 mapDuration _ End = End
 mapDuration f x = case x of
@@ -46,6 +55,17 @@ mapDurationF f (Free x) = case x of
   (MDrum dr d a) -> Free (MDrum dr (f d) $ mapDurationF f a)
   (Rest d a)     -> Free (Rest (f d) $ mapDurationF f a)
   End            -> return ()
+
+mergeF :: Composition r -> Composition r -> Composition r
+mergeF (Free End) c          = c
+mergeF (Pure r)   c          = c >> return r
+mergeF a@(Free x) b@(Free y)
+  | dur x <= dur y = do
+    singleton a
+    singleton b
+    mergeF (nextBeat a) (nextBeat b)
+  | otherwise = mergeF b a
+mergeF a b = mergeF b a
 
 -- |Speed up by a factor of `x`
 speedDiv :: Duration -> Composition r -> Composition ()
@@ -109,8 +129,13 @@ sm  = speedMult
 foldDurationF :: (Duration -> Duration -> Duration) -> Duration -> Composition r -> Composition ()
 foldDurationF f acc (Pure r) = Pure ()
 foldDurationF f acc a@(Free x) = do
-  liftF $ mapDuration (+acc) x
+  liftF $ mapDuration (const acc) x
   foldDurationF f (dur (value a) + acc) (nextBeat a)
+
+normalize :: Composition r -> Composition r
+normalize (Pure r)   = return r
+normalize (Free End) = Free End
+normalize (Free x)   = undefined -- @TODO
 
 value :: Composition r -> Music ()
 value (Pure _)              = End
@@ -147,16 +172,13 @@ concurrent m@(Free x) n@(Free y) = do
   let d  = dur x
       d' = dur y
   if d' < d then do
-    singleton m 
-    mapDurationF (*0) (singleton n)
-    concurrent (rt (d - d') >> nextBeat m) (nextBeat n)
-  else if d < d' then do 
-    singleton n 
-    mapDurationF (*0) (singleton m)
-    concurrent (nextBeat m) (rt (d' - d) >> nextBeat n)
+    singleton n
+    withDuration (d - d') (singleton m)
+    concurrent (nextBeat m) (nextBeat n)
+  else if d < d' then concurrent n m
   else do
     singleton m
-    mapDurationF (*0) (singleton n)
+    withDuration 0 (singleton n)
     concurrent (nextBeat m) (nextBeat n)
 
 {-|Subtractive concurrent merging of `Composition`s. 
