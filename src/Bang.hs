@@ -2,7 +2,7 @@
 
 module Bang(
   play,
-  playIO,
+  bang,
   runComposition,
   module Bang.Music,
   module Bang.Music.MDrum,
@@ -51,8 +51,8 @@ runComposition = do
       runComposition
 
 -- |Play a `Composition` over the first system `Destination` for MIDI events
-playIO :: Composition () -> IO ()
-playIO song = do
+bang :: Composition () -> IO ()
+bang song = do
   dstlist <- enumerateDestinations
   case dstlist of 
     [] -> fail "No MIDI Devices found."

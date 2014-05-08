@@ -8,10 +8,13 @@ module Bang.Music (
   midiEvent,
   nextBeat,
   withDuration,
-  foldDurationF,
+  scanDurationF,
   mapDuration,
   mapDurationF,
+  polyrhythm,
+  normalize,
   mergeF,
+  merge,
   rest, r, rt,
   speedDiv, speedMult,
   double, quad, oct,
@@ -40,7 +43,7 @@ rt :: Duration -> Composition ()
 rt d = liftF $ (Rest d) ()
 
 -- |Sets the duration for all notes in a `Composition`
-withDuration :: Duration -> Composition () -> Composition ()
+withDuration :: Duration -> Composition r -> Composition ()
 withDuration d = mapDurationF (const d)
 
 mapDuration :: (Duration -> Duration) -> Music r -> Music ()
@@ -56,6 +59,27 @@ mapDurationF f (Free x) = case x of
   (Rest d a)     -> Free (Rest (f d) $ mapDurationF f a)
   End            -> return ()
 
+scanDurationF :: (Duration -> Duration -> Duration) -> Duration -> Composition r -> Composition ()
+scanDurationF f acc (Pure r) = Pure ()
+scanDurationF f acc a@(Free x) = do
+  liftF $ mapDuration (const acc) x
+  scanDurationF f (dur (value a) `f` acc) (nextBeat a)
+
+normalize :: Composition r -> Composition ()
+normalize = go 0 
+  where go acc (Pure _) = Pure ()
+        go acc a@(Free x) = do
+          liftF $ mapDuration (\a -> a - acc) x
+          go (dur (value a)) (nextBeat a)
+
+-- |Concurrently `merge` two `Composition`s
+merge :: Composition r -> Composition r -> Composition ()
+merge (Pure _) m = m >> return ()
+merge m (Pure _) = m >> return ()
+merge a@(Free _) b@(Free _) = normalize (a' `mergeF` b')
+  where a' = scanDurationF (+) (dur (value a)) a
+        b' = scanDurationF (+) (dur (value b)) b
+
 mergeF :: Composition r -> Composition r -> Composition r
 mergeF (Free End) c          = c
 mergeF (Pure r)   c          = c >> return r
@@ -66,6 +90,10 @@ mergeF a@(Free x) b@(Free y)
     mergeF (nextBeat a) (nextBeat b)
   | otherwise = mergeF b a
 mergeF a b = mergeF b a
+
+-- |Create a polyrhythm with durations `n` and `m`
+polyrhythm :: (Integer, Composition r) -> (Integer, Composition r) -> Composition ()
+polyrhythm (n, c) (m, c') = (withDuration (1%n) c) `merge` (withDuration (1%m) c')
 
 -- |Speed up by a factor of `x`
 speedDiv :: Duration -> Composition r -> Composition ()
@@ -126,17 +154,6 @@ sts  = thirtysecond
 -- |Shorthand for `speedMult`
 sm  = speedMult
 
-foldDurationF :: (Duration -> Duration -> Duration) -> Duration -> Composition r -> Composition ()
-foldDurationF f acc (Pure r) = Pure ()
-foldDurationF f acc a@(Free x) = do
-  liftF $ mapDuration (const acc) x
-  foldDurationF f (dur (value a) + acc) (nextBeat a)
-
-normalize :: Composition r -> Composition r
-normalize (Pure r)   = return r
-normalize (Free End) = Free End
-normalize (Free x)   = undefined -- @TODO
-
 value :: Composition r -> Music ()
 value (Pure _)              = End
 value (Free End)            = End
@@ -155,7 +172,7 @@ nextBeat (Free (Rest d a))     = a
 -- | NOTE: Still a `Ratio`, so needs to be rounded when the time comes.
 -- |Set the beats per minute of a `Composition`
 bpm :: Integer -> Composition r -> Composition ()
-bpm x song = foldDurationF (+) 0 $ mapDurationF (* (240000 % x)) song
+bpm x song = scanDurationF (+) 0 $ mapDurationF (* (240000 % x)) song
 
 -- @TODO: Remove concurrent `Rests` to make this act normally with `subConcurrent`
 -- |Run two `Composition`s simultaneously and wait for the longer one to complete.
