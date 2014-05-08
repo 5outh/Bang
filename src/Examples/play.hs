@@ -1,6 +1,6 @@
 import Bang
 
-simple = bang $ (120 <>> hc) <&> (120 <>> (bd >> r >> sn >> r))
+simple = bang $ 120 <>> (4 $> hc) & (bd >> r >> sn >> r)
 
 complex = bang $ 240 <>> mirror $ do
   bass & cc
@@ -11,11 +11,11 @@ complex = bang $ 240 <>> mirror $ do
     bass & ch
   double $ 3 $> ((sn & hc) >> bd >> (sn & ho))
 
-test = bang $ 240 <>> do
+test = bang $ 120 <>> do
   double $ 4 $> (sn & hc) >> bd
   quad   $ 8 $> (sn & hc & bd) >> bd
 
-poly = bang $ 120 <>> polyrhythm (3, 3 $> bd) (4, hc >> hc >> (hc & sn))
+poly = polyrhythm (3, 3 $> bd) (4, hc >> hc >> (hc & sn))
 
 amanda = bang $ 120 <>> do
   4 $> bd

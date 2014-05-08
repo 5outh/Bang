@@ -63,7 +63,7 @@ mapDurationF f (Free x) = case x of
 scanDurationF :: (Duration -> Duration -> Duration) -> Duration -> Composition r -> Composition ()
 scanDurationF f acc (Pure r) = Pure ()
 scanDurationF f acc a@(Free x) = do
-  liftF $ mapDuration (const acc) x
+  liftF $ mapDuration (f acc) x
   scanDurationF f (dur (value a) `f` acc) (nextBeat a)
 
 normalize :: Composition r -> Composition ()
@@ -175,13 +175,9 @@ nextBeat (Free (Rest d a))     = a
 bpm :: Integer -> Composition r -> Composition ()
 bpm x song = scanDurationF (+) 0 $ mapDurationF (* (240000 % x)) song
 
--- @TODO: Remove concurrent `Rests` to make this act normally with `subConcurrent`
+-- @TODO: Make this work with multiple time signatures
 -- |Run two `Composition`s simultaneously and wait for the longer one to complete.
 concurrent :: Composition r -> Composition r -> Composition ()
-concurrent (Pure _) (Pure _)     = return ()
-concurrent (Free End) (Free End) = return ()
-concurrent (Free End) (Pure _)   = return ()
-concurrent (Pure _) (Free End)   = return ()
 concurrent m (Pure r)            = m >> return ()
 concurrent (Pure r) m            = m >> return ()
 concurrent m (Free End)          = m >> return ()
