@@ -59,6 +59,7 @@ mapDurationF f (Free x) = case x of
   (Rest d a)     -> Free (Rest (f d) $ mapDurationF f a)
   End            -> return ()
 
+-- TODO: FIX THIS
 scanDurationF :: (Duration -> Duration -> Duration) -> Duration -> Composition r -> Composition ()
 scanDurationF f acc (Pure r) = Pure ()
 scanDurationF f acc a@(Free x) = do

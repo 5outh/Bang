@@ -9,7 +9,6 @@ complex = bang $ 240 <>> mirror $ do
     quad $ 4 $> hc & bd
     sn & ho
     bass & ch
-  mirror $ quad $ (4 $> bd >> hc)
   double $ 3 $> ((sn & hc) >> bd >> (sn & ho))
 
 test = bang $ 240 <>> do
