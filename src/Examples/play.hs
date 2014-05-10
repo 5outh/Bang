@@ -17,9 +17,9 @@ test = bang $ 120 <>> do
   quad   $ 8  $> (sn & hc & bd) >> bd
   oct    $ 16 $> (sn & hc & bd) >> bd
 
-doubleBass = bang $ 240 <>> (withDuration (1%12) $ 3 $> bd) & cc
+doubleBass = double $ (triplets $ 3 $> bd) & cr
 
-poly = bang $ 120 ^> polyrhythm (3, 3 $> bd) (4, 4 $> sn)
+poly = polyrhythm (3, 3 $> bd) (4, 4 $> sn)
 
 quints = bang $ 480 <>> quintuplets $ (hc & bd) >> (4 $> bd)
 
@@ -34,3 +34,22 @@ wonko = bang $ 120 ^> do
   sn & bd
   bass & hc
   sn & ho
+
+supernova = bang $ 240 <>> do
+  2 $> quintuplets $ (bd >> sn >> (double $ 2$> bd >> sn) >> ho) & (4 $> hc)
+
+toxicity = bang $ 240 <>> do
+  let sh = sn & hc
+  bd
+  double $ sh >> bd >> r >> bd >> sh >> r >> bd >> r >> sh >> r
+  double $ 2 $> (sn >> sn >> t1 >> t1 >> t2 >> t2)
+  double $ do
+    (bd & cc) >> r  >> hc  >> sn
+    hc        >> bd >> sh  >> r
+    hc >> sn  >> (bd & hc) >> r
+    (bd & hc) >> r  >> hc  >> sh
+    hc >> bd  >> sh >> r
+    bd >> r   >> sh >> r
+
+
+

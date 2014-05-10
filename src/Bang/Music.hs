@@ -61,6 +61,7 @@ scanDurationF f acc a@(Free x) = do
   liftF $ mapDuration (const acc) x
   scanDurationF f (dur (value a) `f` acc) (nextBeat a)
 
+-- @TODO: Handle `Rest`s separately
 mergeCompositions :: Composition r -> Composition r -> Composition ()
 mergeCompositions a' b' = go 0 0 a' b'
   where go :: Duration -> Duration -> Composition r -> Composition r -> Composition ()

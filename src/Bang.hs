@@ -24,10 +24,7 @@ import Bang.Music.MDrum
 import Bang.Interface.MDrum
 import Bang.Operators
 
-{- @TODO: Prove the eight laws of polymorphic temporal media:
-  
--}
-
+-- @TODO: Composition r -> Composition == Free Music (), for theorems
 
 printComposition :: Composition r -> IO ()
 printComposition (Pure _) = return ()
