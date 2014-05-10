@@ -1,11 +1,7 @@
 {-# LANGUAGE DeriveFunctor #-}
 
 module Bang.Music (
-  Media(..),
-  MusicM(..),
   bpm,
-  concurrent,
-  subConcurrent,
   interleave,
   midiEvent,
   nextBeat,
@@ -14,17 +10,14 @@ module Bang.Music (
   mapDuration,
   mapDurationF,
   polyrhythm,
-  normalize,
-  mergeF,
-  merge,
   mergeCompositions,
   rest, r, rt,
   speedDiv, speedMult,
   double, quad, oct,
   dbl, qd, sm,
   half, quarter, eighth, sixteenth, thirtysecond,
+  triplets, quintuplets,
   sh, sq, se, sts, sd,
-  rev, mirror,
   module Bang.Music.Class
 ) where
 
@@ -33,14 +26,6 @@ import Bang.Music.MDrum
 import Control.Monad.Free
 import System.MIDI
 import Data.Ratio
-
--- NB. :+: == >>, for free
-data Media a = 
-    Prim a
-  | Media a :=: Media a
-    deriving (Show, Eq, Functor)
-
-type MusicM = Media (Composition ())
 
 -- |Rest for one beat.
 rest :: Composition ()
@@ -70,7 +55,6 @@ mapDurationF f (Free x) = case x of
   (Rest d a)     -> Free (Rest (f d) $ mapDurationF f a)
   End            -> return ()
 
--- TODO: FIX THIS
 scanDurationF :: (Duration -> Duration -> Duration) -> Duration -> Composition r -> Composition ()
 scanDurationF f acc (Pure r) = Pure ()
 scanDurationF f acc a@(Free x) = do
@@ -82,46 +66,27 @@ mergeCompositions a' b' = go 0 0 a' b'
   where go :: Duration -> Duration -> Composition r -> Composition r -> Composition ()
         go sumA sumB a          (Pure _)   = a >> return ()
         go sumA sumB (Pure _)   b          = b >> return ()
-        go sumA sumB a@(Free x) b@(Free y) = do
-          let isStart = sumA == 0 && sumB == 0
-              da = dur (value a)
-              db = dur (value b)
-          else if sumA <= sumB || (isStart && da < db) then do
+        go sumA sumB a@(Free x) b@(Free y) =
+          if sumA == 0 && sumB == 0 then do
+            -- go with the one with smallest delay
+            let da = dur (value a)
+                db = dur (value b)
+            if da <= db then do
+              withDuration (sumB - sumA) (singleton a)
+              go (sumA + dur (value a)) sumB (nextBeat a) b
+            else do
+              withDuration (sumA - sumB) (singleton b)
+              go sumA (sumB + dur (value b)) a (nextBeat b)
+          else if sumA <= sumB then do
             withDuration (sumB - sumA) (singleton a)
             go (sumA + dur (value a)) sumB (nextBeat a) b
           else do
             withDuration (sumA - sumB) (singleton b)
             go sumA (sumB + dur (value b)) a (nextBeat b)
 
-normalize :: Composition r -> Composition ()
-normalize = go 0 
-  where go acc (Pure _) = Pure ()
-        go acc a@(Free x) = do
-          liftF $ mapDuration (\a -> a - acc) x
-          go (dur (value a)) (nextBeat a)
-
--- |Concurrently `merge` two `Composition`s
-merge :: Composition r -> Composition r -> Composition ()
-merge (Pure _) m = m >> return ()
-merge m (Pure _) = m >> return ()
-merge a@(Free _) b@(Free _) = normalize (a' `mergeF` b')
-  where a' = scanDurationF (+) (dur (value a)) a
-        b' = scanDurationF (+) (dur (value b)) b
-
-mergeF :: Composition r -> Composition r -> Composition r
-mergeF (Free End) c          = c
-mergeF (Pure r)   c          = c >> return r
-mergeF a@(Free x) b@(Free y)
-  | dur x <= dur y = do
-    singleton a
-    singleton b
-    mergeF (nextBeat a) (nextBeat b)
-  | otherwise = mergeF b a
-mergeF a b = mergeF b a
-
 -- |Create a polyrhythm with durations `n` and `m`
 polyrhythm :: (Integer, Composition r) -> (Integer, Composition r) -> Composition ()
-polyrhythm (n, c) (m, c') = (withDuration (1%n) c) `merge` (withDuration (1%m) c')
+polyrhythm (n, c) (m, c') = (withDuration (1%n) c) `mergeCompositions` (withDuration (1%m) c')
 
 -- |Speed up by a factor of `x`
 speedDiv :: Duration -> Composition r -> Composition ()
@@ -182,6 +147,12 @@ sts  = thirtysecond
 -- |Shorthand for `speedMult`
 sm  = speedMult
 
+-- |Turn quarter notes into triplets
+triplets = speedMult (4%3)
+
+-- |Turn quarter notes into quintuplets
+quintuplets = speedMult (4%5)
+
 value :: Composition r -> Music ()
 value (Pure _)              = End
 value (Free End)            = End
@@ -202,62 +173,6 @@ nextBeat (Free (Rest d a))     = a
 bpm :: Integer -> Composition r -> Composition ()
 bpm x song = scanDurationF (+) 0 $ mapDurationF (* (240000 % x)) song
 
--- @TODO: Make this work with multiple time signatures
--- |Run two `Composition`s simultaneously and wait for the longer one to complete.
-concurrent :: Composition r -> Composition r -> Composition ()
-concurrent m (Pure r)            = m >> return ()
-concurrent (Pure r) m            = m >> return ()
-concurrent m (Free End)          = m >> return ()
-concurrent (Free End) m          = m >> return ()
-concurrent m@(Free x) n@(Free y) = do
-  let d  = dur x
-      d' = dur y
-  if d' < d then do
-    singleton n
-    withDuration (d - d') (singleton m)
-    concurrent (nextBeat m) (nextBeat n)
-  else if d < d' then concurrent n m
-  else do
-    singleton m
-    withDuration 0 (singleton n)
-    concurrent (nextBeat m) (nextBeat n)
-
-{-|Subtractive concurrent merging of `Composition`s. 
-  Where a `Rest` is present in one signal, a `Rest` is placed into the other.
--}
-subConcurrent :: Composition r -> Composition r -> Composition ()
-subConcurrent (Pure _) (Pure _)     = return ()
-subConcurrent (Free End) (Free End) = return ()
-subConcurrent (Free End) (Pure _)   = return ()
-subConcurrent (Pure _) (Free End)   = return ()
-subConcurrent m (Pure r)            = m >> return ()
-subConcurrent (Pure r) m            = m >> return ()
-subConcurrent m (Free End)          = m >> return ()
-subConcurrent (Free End) m          = m >> return ()
-subConcurrent m@(Free (Rest d a)) n@(Free x) = go (dur x)
-  where go d' | d' < d    = singleton m >> subConcurrent (rt (d - d') >> nextBeat m) (nextBeat n)
-              | d < d'    = singleton m >> subConcurrent (nextBeat m) (rt (d' - d) >> nextBeat n)
-              | otherwise = singleton m >> subConcurrent (nextBeat m) (nextBeat n)
-subConcurrent n@(Free x) m@(Free (Rest d a)) = go (dur x)
-  where go d' | d' < d    = singleton m >> subConcurrent (rt (d - d') >> nextBeat m) (nextBeat n)
-              | d < d'    = singleton m >> subConcurrent (nextBeat m) (rt (d' - d) >> nextBeat n)
-              | otherwise = singleton m >> subConcurrent (nextBeat m) (nextBeat n)
-subConcurrent m@(Free x) n@(Free y) = do
-  let d  = dur x
-      d' = dur y
-  if d' < d then do
-    singleton m 
-    mapDurationF (*0) (singleton n)
-    subConcurrent (rt (d - d') >> nextBeat m) (nextBeat n)
-  else if d < d' then do 
-    singleton n 
-    mapDurationF (*0) (singleton m)
-    subConcurrent (nextBeat m) (rt (d' - d) >> nextBeat n)
-  else do
-    singleton m
-    mapDurationF (*0) (singleton n)
-    subConcurrent (nextBeat m) (nextBeat n)
-
 -- |Interleave the beats of two `Composition`s
 interleave :: Composition r -> Composition r -> Composition ()
 interleave (Pure _) (Pure _) = return ()
@@ -267,16 +182,6 @@ interleave a b = singleton minD >> interleave maxD (nextBeat minD)
   where (minD, maxD) = if dur (value a) <= dur (value b)
                        then (a, b) 
                        else (b, a)
-
--- |Reverse a `Composition`
-rev :: Composition () -> Composition ()
-rev (Pure r)   = return ()
-rev (Free End) = return ()
-rev f          = rev (nextBeat f) >> singleton f
-
--- |Play a `Composition` forward, and then in reverse.
-mirror :: Composition () -> Composition ()
-mirror f = f >> rev f
 
 -- |Convenience constructor for a `MidiEvent`
 midiEvent :: Delay -> Int -> MidiEvent

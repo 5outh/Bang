@@ -24,6 +24,11 @@ import Bang.Music.MDrum
 import Bang.Interface.MDrum
 import Bang.Operators
 
+{- @TODO: Prove the eight laws of polymorphic temporal media:
+  
+-}
+
+
 printComposition :: Composition r -> IO ()
 printComposition (Pure _) = return ()
 printComposition (Free End) = return ()
