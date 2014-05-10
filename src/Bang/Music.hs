@@ -48,23 +48,31 @@ mergeCompositions a' b' = go 0 0 a' b'
   where go :: Duration -> Duration -> Composition -> Composition -> Composition
         go sumA sumB a          (Pure _)   = a >> return ()
         go sumA sumB (Pure _)   b          = b >> return ()
-        go sumA sumB a@(Free x) b@(Free y) =
-          if sumA == 0 && sumB == 0 then do
-            -- go with the one with smallest delay
-            let da = dur (value a)
-                db = dur (value b)
-            if da <= db then do
-              withDuration (sumB - sumA) (singleton a)
-              go (sumA + dur (value a)) sumB (nextBeat a) b
-            else do
-              withDuration (sumA - sumB) (singleton b)
-              go sumA (sumB + dur (value b)) a (nextBeat b)
-          else if sumA <= sumB then do
-            withDuration (sumB - sumA) (singleton a)
-            go (sumA + dur (value a)) sumB (nextBeat a) b
-          else do
-            withDuration (sumA - sumB) (singleton b)
-            go sumA (sumB + dur (value b)) a (nextBeat b)
+        go sumA sumB a@(Free x) b@(Free y) = do
+          let goA = do
+                withDuration (sumB - sumA) (singleton a)
+                go (sumA + dur (value a)) sumB (nextBeat a) b
+              goB = do
+                withDuration (sumA - sumB) (singleton b)
+                go sumA (sumB + dur (value b)) a (nextBeat b)
+              zeroRest r = case r of
+                Rest 0 _ -> True
+                _        -> False
+          case (zeroRest x, zeroRest y) of
+            (True, True)  -> go sumA sumB (nextBeat a) (nextBeat b)
+            (False, True) -> go sumA sumB a (nextBeat b)
+            (True, False) -> go sumA sumB (nextBeat a) b
+            (False, False) -> do 
+              if all (==0) [sumA, sumB] then do
+                -- go with the one with smallest delay, and if they're the same,
+                -- use the implicit order
+                let da = dur (value a)
+                    db = dur (value b)
+                if da < db then goA 
+                else if da > db then goB
+                else -- da == db
+                  if value a < value b then goA else goB
+              else if sumA <= sumB then goA else goB
 
 value :: Composition -> Music ()
 value (Pure _)              = End

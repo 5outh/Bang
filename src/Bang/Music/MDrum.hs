@@ -11,14 +11,14 @@ data CymbalType =
   | Splash
   | China
   | Bell
-    deriving (Show, Eq)
+    deriving (Show, Eq, Ord)
 
 -- |Data type representing tom drums
 data TomType = 
     Floor
   | Hang1
   | Hang2
-    deriving (Show, Eq)
+    deriving (Show, Eq, Ord)
 
 -- |Data type representing a drum
 data Drum = 
@@ -27,4 +27,4 @@ data Drum =
   | Tom TomType
   | Cymbal CymbalType
   | HiHat Bool
-    deriving (Show, Eq)
+    deriving (Show, Eq, Ord)

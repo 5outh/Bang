@@ -67,7 +67,6 @@ playBass  d = midiEvent d 35
 -- |A `MidiEvent` for a single snare drum beat with given `Delay`
 playSnare d = midiEvent d 38
 
-
 -- |A `MidiEvent` for a single tom drum beat with given `TomType` and `Delay`
 playTom :: TomType -> Delay -> MidiEvent
 playTom t d = midiEvent d $ case t of

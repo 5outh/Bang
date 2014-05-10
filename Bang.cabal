@@ -17,9 +17,20 @@ extra-source-files:  README.md
 cabal-version:       >=1.10
 
 library
-  exposed-modules:     Bang, Bang.Music, Bang.Operators, Bang.Interface.MDrum, Bang.Music.Class, Bang.Music.MDrum
+  exposed-modules:     Bang, 
+                       Bang.Music, 
+                       Bang.Operators,  
+                       Bang.Interface.Base,
+                       Bang.Interface.MDrum,
+                       Bang.Music.Class, 
+                       Bang.Music.MDrum
   -- other-modules:       
   other-extensions:    DeriveFunctor, NoMonomorphismRestriction
-  build-depends:       base >=4.6 && <4.7, free >=4.6 && <4.7, mtl >=2.1 && <2.2, transformers >=0.3 && <0.4, hmidi >=0.2 && <0.3
+  build-depends:       base >=4.6 && <4.7, 
+                       free >=4.6 && <4.7, 
+                       mtl >=2.1 && <2.2, 
+                       transformers >=0.3 && <0.4, 
+                       hmidi >=0.2 && <0.3
+
   hs-source-dirs:      src
   default-language:    Haskell2010

@@ -4,12 +4,11 @@ module Bang(
   play,
   bang,
   runComposition,
-  printComposition,
   module Bang.Music,
   module Bang.Music.MDrum,
   module Bang.Interface.MDrum,
-  module Bang.Operators,
-  module Bang.Music.Utils
+  module Bang.Interface.Base,
+  module Bang.Operators
 )where
 
 import Control.Monad
@@ -23,15 +22,8 @@ import System.MIDI
 import Bang.Music
 import Bang.Music.MDrum
 import Bang.Interface.MDrum
+import Bang.Interface.Base
 import Bang.Operators
-import Bang.Music.Utils
-
-printComposition :: Composition -> IO ()
-printComposition (Pure _) = return ()
-printComposition (Free End) = return ()
-printComposition (Free x) = case x of
-  MDrum d dur n -> putStrLn (show d  ++ " : " ++ show dur) >> printComposition n
-  Rest    dur n -> putStrLn ("Rest " ++ " : " ++ show dur) >> printComposition n
 
 -- |`play` a `Composition` over a given `Connection`
 play :: Connection -> Composition -> IO ()
@@ -57,7 +49,7 @@ runComposition = do
             let MidiEvent s ev = drumToMidiEvent m
             lift $ print (MidiEvent s ev)
             lift $ send conn ev
-      lift $ threadDelay 500
+      lift $ threadDelay 1000
       runComposition
 
 -- |Play a `Composition` over the first system `Destination` for MIDI events

@@ -1,4 +1,4 @@
-module Bang.Music.Utils where
+module Bang.Interface.Base where
 
 import Bang.Music
 import Control.Monad.Free
