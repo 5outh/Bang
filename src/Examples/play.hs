@@ -53,3 +53,5 @@ toxicity = bang $ 240 <>> do
     m4 (bd & hc) r  hc        sh
     m4 hc        bd sh        r
     m4 bd        r  sh        r
+
+mirrorify = bang $ 480 <>> mirror $ 2 $> mapM_ (4 $>) [sn, t2, t1, tf, bd]

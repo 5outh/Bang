@@ -72,10 +72,11 @@ instance Arbitrary Composition where
 associative_seq :: Composition -> Composition -> Composition -> Bool
 associative_seq c1 c2 c3 = ((c1 >> c2) >> c3) == (c1 >> (c2 >> c3))
 
+-- & is actually incorrect (the following has two hc's with duration)
 associative_and :: Composition -> Composition -> Composition -> Bool
 associative_and c1 c2 c3 = ((c1 & c2) & c3) == (c2 & (c2 & c3))
 
--- FALSE
+-- Never terminates...
 symmetric_and :: Composition -> Composition -> Bool
 symmetric_and c1 c2 = (c1 & c2) == (c2 & c1)
 
@@ -85,7 +86,8 @@ right_zero c = c == (c >> return ())
 left_zero :: Composition -> Bool
 left_zero c = c == (return () >> c)
 
--- fails when duration = 0
+-- This is absolutely incorrect,
+-- (withDuration 0 bd >> bd) & rt 1 == withDuration 0 (bd >> bd) >> rt 1
 rest_idempotency :: Composition -> Duration -> Bool
 rest_idempotency c d = (c & rt d) == c
 

@@ -4,7 +4,11 @@ module Bang.Music.Class (
   Music(..),
   Composition,
   Delay,
-  Duration
+  Duration,
+  takeZeros,
+  dropZeros,
+  equivZeros,
+  elems
 ) where
 
 import Bang.Music.MDrum
@@ -32,5 +36,52 @@ showComposition (Free x) = case x of
   MDrum d dur n -> (show d  ++ " : " ++ show dur ++ "\n") ++ showComposition n
   Rest    dur n -> ("Rest " ++ " : " ++ show dur ++ "\n") ++ showComposition n
 
+elems :: Composition -> [Music ()]
+elems (Pure ())             = []
+elems (Free End)            = [End]
+elems (Free (MDrum dr d n)) = MDrum dr d () : elems n
+elems (Free (Rest d n))     = Rest d ()     : elems n
+
+-- NOTE: THESE ARE VERY SPECIALIZED FUNCTIONS FOR TESTING EQUIVALENCY, 
+--       AND PROBABLY DON'T WORK THE WAY YOU THINK. They are REALLY only
+--       useful for testing equivalency and not recommended for use outside
+--       of this module.
+takeZeros :: Composition -> Composition
+takeZeros (Free End) = return ()
+takeZeros (Pure _)   = return ()
+takeZeros (Free (MDrum dr d n))
+  | d == 0    = liftF (MDrum dr d ()) >> takeZeros n
+  | otherwise = liftF (MDrum dr 0 ())
+takeZeros (Free (Rest d n))
+  | d == 0    = liftF (Rest d ()) >> takeZeros n
+  | otherwise = liftF (Rest 0 ())
+
+dropZeros :: Composition -> Composition
+dropZeros (Free End) = return ()
+dropZeros (Pure _)   = return ()
+dropZeros (Free (MDrum dr d n))
+  | d == 0    = dropZeros n
+  | otherwise = n
+dropZeros (Free (Rest d n))
+  | d == 0    = dropZeros n
+  | otherwise = n
+
+equivZeros :: Composition -> Composition -> Bool
+equivZeros m n = (length elemsM == length elemsN)
+          && all (`elem` elemsM) elemsN
+  where elemsM = elems $ takeZeros m
+        elemsN = elems $ takeZeros n
+
 instance Show Composition where
   show = showComposition
+
+instance Eq Composition where
+  (Free End) == (Free End) = True
+  (Pure ())  == (Pure ())  = True
+  a@(Free (Rest 0 n)) == m = n == m || a == m
+  m == b@(Free (Rest 0 n)) = m == n || b == m
+  (Free (Rest d n)) == (Free (Rest d' m)) = d == d' && n == m
+  a@(Free (MDrum dr d n)) == b@(Free (MDrum dr' d' m))
+    | d == 0 && d' == 0 = equivZeros a b && (dropZeros a == dropZeros b) 
+    | otherwise = dr == dr && d == d' && n == m
+  a == b = False
