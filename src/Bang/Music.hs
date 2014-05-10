@@ -9,6 +9,8 @@ module Bang.Music (
   scanDurationF,
   mapDuration,
   mapDurationF,
+  singleton,
+  value,
   mergeCompositions,
   module Bang.Music.Class
 ) where

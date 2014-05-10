@@ -1,6 +1,7 @@
 module Bang.Interface.Base where
 
 import Bang.Music
+import Bang.Music.Class
 import Control.Monad.Free
 import Data.Ratio
 
@@ -27,6 +28,31 @@ measure4 c1 c2 c3 c4 = c1 >> c2 >> c3 >> c4
 -- |Shorthand for `measure4`
 m4 :: Composition -> Composition -> Composition -> Composition -> Composition
 m4 = measure4
+
+-- |Reverses the notes in a `Composition`
+reverseComposition :: Composition -> Composition
+reverseComposition = flipZeros . go
+  where go (Free End) = Free End
+        go (Pure ())  = return ()
+        go x@(Free _) = go (nextBeat x) >> singleton x
+
+-- |Shorthand for `reverseComposition`
+rev :: Composition -> Composition
+rev = reverseComposition
+
+-- |Play a `Composition` forwards and then backwards
+mirror :: Composition -> Composition
+mirror c = c >> rev c
+
+flipZeros :: Composition -> Composition
+flipZeros (Free End) = Free End
+flipZeros (Pure _)   = return ()
+flipZeros x@(Free _) = case nextBeat x of
+    Free End -> x >> Free End
+    Pure _   -> x
+    next     -> case dur (value next) of
+      0 -> singleton next >> flipZeros (singleton x >> (nextBeat next))
+      _ -> singleton x >> flipZeros next
 
 -- |Speed up by a factor of `x`
 speedDiv :: Duration -> Composition -> Composition
