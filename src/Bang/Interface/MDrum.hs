@@ -6,7 +6,7 @@ import Control.Monad.Free
 import System.MIDI
 import Data.Ratio
 
-snare, bass :: Composition ()
+snare, bass :: Composition
 -- |A single snare drum beat
 snare = liftF $ (MDrum Snare (1 % 4)) ()
 
@@ -14,15 +14,15 @@ snare = liftF $ (MDrum Snare (1 % 4)) ()
 bass  = liftF $ (MDrum Bass (1 % 4)) ()
 
 -- |A single tom drum beat, with a given `TomType`
-tom :: TomType -> Composition ()
+tom :: TomType -> Composition
 tom t = liftF $ (MDrum (Tom t) (1 % 4)) ()
 
 -- |A single cymbal hit, with a given `CymbalType`
-cymbal :: CymbalType -> Composition ()
+cymbal :: CymbalType -> Composition
 cymbal c = liftF $ (MDrum (Cymbal c) (1 % 4)) ()
 
 -- |A single hi-hat hit, either open or closed
-hiHat :: Bool -> Composition ()
+hiHat :: Bool -> Composition
 hiHat open = liftF $ (MDrum (HiHat open) (1 % 4)) ()
 
 -- |Shorthand for `snare`

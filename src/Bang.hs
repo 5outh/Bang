@@ -24,9 +24,9 @@ import Bang.Music.MDrum
 import Bang.Interface.MDrum
 import Bang.Operators
 
--- @TODO: Composition r -> Composition == Free Music (), for theorems
+-- @TODO: Composition -> Composition == Free Music (), for theorems
 
-printComposition :: Composition r -> IO ()
+printComposition :: Composition -> IO ()
 printComposition (Pure _) = return ()
 printComposition (Free End) = return ()
 printComposition (Free x) = case x of
@@ -34,14 +34,14 @@ printComposition (Free x) = case x of
   Rest    dur n -> putStrLn ("Rest " ++ " : " ++ show dur) >> printComposition n
 
 -- |`play` a `Composition` over a given `Connection`
-play :: Connection -> Composition r -> IO ()
+play :: Connection -> Composition -> IO ()
 play conn c = do
   start conn
   evalStateT runComposition (conn, c)
   close conn
 
 -- |Run a `Composition` by repeatedly updating the `Connection` and sending events as they come.
-runComposition :: StateT (Connection, Composition r) IO ()
+runComposition :: StateT (Connection, Composition) IO ()
 runComposition = do
   (conn, evs) <- get
   t <- lift $ currentTime conn
@@ -61,7 +61,7 @@ runComposition = do
       runComposition
 
 -- |Play a `Composition` over the first system `Destination` for MIDI events
-bang :: Composition r -> IO ()
+bang :: Composition -> IO ()
 bang song = do
   dstlist <- enumerateDestinations
   case dstlist of 

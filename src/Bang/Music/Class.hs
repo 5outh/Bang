@@ -23,4 +23,4 @@ data Music a =
     deriving (Show, Eq, Functor)
 
 -- |A data type for a `Composition` consisting of a stream of `Music`s
-type Composition r = Free Music r
+type Composition = Free Music ()

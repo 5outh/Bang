@@ -28,18 +28,18 @@ import System.MIDI
 import Data.Ratio
 
 -- |Rest for one beat.
-rest :: Composition ()
+rest :: Composition
 rest  = liftF $ (Rest $ 1 % 4) ()
 
 -- |Shorthand for `rest`
 r = rest
 
 -- |Rest for a specified number of 32nd notes.
-rt :: Duration -> Composition ()
+rt :: Duration -> Composition
 rt d = liftF $ (Rest d) ()
 
 -- |Sets the duration for all notes in a `Composition`
-withDuration :: Duration -> Composition r -> Composition ()
+withDuration :: Duration -> Composition -> Composition
 withDuration d = mapDurationF (const d)
 
 mapDuration :: (Duration -> Duration) -> Music r -> Music ()
@@ -48,23 +48,23 @@ mapDuration f x = case x of
   (MDrum dr d a) -> MDrum dr (f d) ()
   (Rest d a)     -> Rest (f d) ()
 
-mapDurationF :: (Duration -> Duration) -> Composition r -> Composition ()
+mapDurationF :: (Duration -> Duration) -> Composition -> Composition
 mapDurationF _ (Pure r) = return ()
 mapDurationF f (Free x) = case x of
   (MDrum dr d a) -> Free (MDrum dr (f d) $ mapDurationF f a)
   (Rest d a)     -> Free (Rest (f d) $ mapDurationF f a)
   End            -> return ()
 
-scanDurationF :: (Duration -> Duration -> Duration) -> Duration -> Composition r -> Composition ()
+scanDurationF :: (Duration -> Duration -> Duration) -> Duration -> Composition -> Composition
 scanDurationF f acc (Pure r) = Pure ()
 scanDurationF f acc a@(Free x) = do
   liftF $ mapDuration (const acc) x
   scanDurationF f (dur (value a) `f` acc) (nextBeat a)
 
 -- @TODO: Handle `Rest`s separately
-mergeCompositions :: Composition r -> Composition r -> Composition ()
+mergeCompositions :: Composition -> Composition -> Composition
 mergeCompositions a' b' = go 0 0 a' b'
-  where go :: Duration -> Duration -> Composition r -> Composition r -> Composition ()
+  where go :: Duration -> Duration -> Composition -> Composition -> Composition
         go sumA sumB a          (Pure _)   = a >> return ()
         go sumA sumB (Pure _)   b          = b >> return ()
         go sumA sumB a@(Free x) b@(Free y) =
@@ -86,15 +86,15 @@ mergeCompositions a' b' = go 0 0 a' b'
             go sumA (sumB + dur (value b)) a (nextBeat b)
 
 -- |Create a polyrhythm with durations `n` and `m`
-polyrhythm :: (Integer, Composition r) -> (Integer, Composition r) -> Composition ()
+polyrhythm :: (Integer, Composition) -> (Integer, Composition) -> Composition
 polyrhythm (n, c) (m, c') = (withDuration (1%n) c) `mergeCompositions` (withDuration (1%m) c')
 
 -- |Speed up by a factor of `x`
-speedDiv :: Duration -> Composition r -> Composition ()
+speedDiv :: Duration -> Composition -> Composition
 speedDiv x = mapDurationF (/x)
 
 -- |Slow down by a factor of `x`
-speedMult :: Duration -> Composition r -> Composition ()
+speedMult :: Duration -> Composition -> Composition
 speedMult x = mapDurationF (*x)
 
 -- |double the speed of a `Composition`
@@ -154,28 +154,28 @@ triplets = speedMult (4%3)
 -- |Turn quarter notes into quintuplets
 quintuplets = speedMult (4%5)
 
-value :: Composition r -> Music ()
+value :: Composition -> Music ()
 value (Pure _)              = End
 value (Free End)            = End
 value (Free (MDrum dr d a)) = (MDrum dr d) ()
 value (Free (Rest d a))     = (Rest d) ()
 
-singleton :: Composition r -> Composition ()
+singleton :: Composition -> Composition
 singleton = liftF . value
 
 -- |Get the next beat in a `Composition`
-nextBeat :: Composition r -> Composition r
+nextBeat :: Composition -> Composition
 nextBeat (Pure r)              = return r
 nextBeat (Free (MDrum dr d a)) = a
 nextBeat (Free (Rest d a))     = a
 
 -- | NOTE: Still a `Ratio`, so needs to be rounded when the time comes.
 -- |Set the beats per minute of a `Composition`
-bpm :: Integer -> Composition r -> Composition ()
+bpm :: Integer -> Composition -> Composition
 bpm x song = scanDurationF (+) 0 $ mapDurationF (* (240000 % x)) song
 
 -- |Interleave the beats of two `Composition`s
-interleave :: Composition r -> Composition r -> Composition ()
+interleave :: Composition -> Composition -> Composition
 interleave (Pure _) (Pure _) = return ()
 interleave (Pure r) x = singleton x
 interleave x (Pure r) = singleton x
