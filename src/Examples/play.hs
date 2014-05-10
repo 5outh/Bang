@@ -15,7 +15,7 @@ test = bang $ 120 <>> do
   double $ 4 $> (sn & hc) >> bd
   quad   $ 8 $> (sn & hc & bd) >> bd
 
-poly = polyrhythm (3, 3 $> bd) (4, hc >> hc >> (hc & sn))
+poly = polyrhythm (3, 3 $> bd) (4, hc >> hc >> (hc & sn) >> hc)
 
 amanda = bang $ 120 <>> do
   4 $> bd

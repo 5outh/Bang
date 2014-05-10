@@ -1,6 +1,8 @@
 {-# LANGUAGE DeriveFunctor #-}
 
 module Bang.Music (
+  Media(..),
+  MusicM(..),
   bpm,
   concurrent,
   subConcurrent,
@@ -15,6 +17,7 @@ module Bang.Music (
   normalize,
   mergeF,
   merge,
+  mergeCompositions,
   rest, r, rt,
   speedDiv, speedMult,
   double, quad, oct,
@@ -30,6 +33,14 @@ import Bang.Music.MDrum
 import Control.Monad.Free
 import System.MIDI
 import Data.Ratio
+
+-- NB. :+: == >>, for free
+data Media a = 
+    Prim a
+  | Media a :=: Media a
+    deriving (Show, Eq, Functor)
+
+type MusicM = Media (Composition ())
 
 -- |Rest for one beat.
 rest :: Composition ()
@@ -63,8 +74,24 @@ mapDurationF f (Free x) = case x of
 scanDurationF :: (Duration -> Duration -> Duration) -> Duration -> Composition r -> Composition ()
 scanDurationF f acc (Pure r) = Pure ()
 scanDurationF f acc a@(Free x) = do
-  liftF $ mapDuration (f acc) x
+  liftF $ mapDuration (const acc) x
   scanDurationF f (dur (value a) `f` acc) (nextBeat a)
+
+mergeCompositions :: Composition r -> Composition r -> Composition ()
+mergeCompositions a' b' = go 0 0 a' b'
+  where go :: Duration -> Duration -> Composition r -> Composition r -> Composition ()
+        go sumA sumB a          (Pure _)   = a >> return ()
+        go sumA sumB (Pure _)   b          = b >> return ()
+        go sumA sumB a@(Free x) b@(Free y) = do
+          let isStart = sumA == 0 && sumB == 0
+              da = dur (value a)
+              db = dur (value b)
+          else if sumA <= sumB || (isStart && da < db) then do
+            withDuration (sumB - sumA) (singleton a)
+            go (sumA + dur (value a)) sumB (nextBeat a) b
+          else do
+            withDuration (sumA - sumB) (singleton b)
+            go sumA (sumB + dur (value b)) a (nextBeat b)
 
 normalize :: Composition r -> Composition ()
 normalize = go 0 
