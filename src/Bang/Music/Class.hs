@@ -77,11 +77,13 @@ instance Show Composition where
 
 instance Eq Composition where
   (Free End) == (Free End) = True
+  (Free End) == _          = False
   (Pure ())  == (Pure ())  = True
-  a@(Free (Rest 0 n)) == m = n == m || a == m
-  m == b@(Free (Rest 0 n)) = m == n || b == m
-  (Free (Rest d n)) == (Free (Rest d' m)) = d == d' && n == m
+  (Pure _)   == _          = False
+  a@(Free (Rest 0 n)) == m = n == m
+  m == b@(Free (Rest 0 n)) = m == n
   a@(Free (MDrum dr d n)) == b@(Free (MDrum dr' d' m))
     | d == 0 && d' == 0 = equivZeros a b && (dropZeros a == dropZeros b) 
     | otherwise = dr == dr && d == d' && n == m
+  (Free (Rest d n)) == (Free (Rest d' m)) = d == d' && n == m  
   a == b = False
