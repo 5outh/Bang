@@ -47,12 +47,9 @@ toxicity = bang $ 240 <>> do
     double $ 4 $> sn
     mapM_ (2 $>) [sn, t1, t2]
   double $ do
-    (bd & cc) >> r  >> hc  >> sn
-    hc        >> bd >> sh  >> r
-    hc >> sn  >> (bd & hc) >> r
-    (bd & hc) >> r  >> hc  >> sh
-    hc >> bd  >> sh >> r
-    bd >> r   >> sh >> r
-
-
-
+    m4 (bd & cc) r  hc        sn
+    m4 hc        bd sh        r
+    m4 hc        sn (bd & hc) r
+    m4 (bd & hc) r  hc        sh
+    m4 hc        bd sh        r
+    m4 bd        r  sh        r

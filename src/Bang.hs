@@ -8,7 +8,8 @@ module Bang(
   module Bang.Music,
   module Bang.Music.MDrum,
   module Bang.Interface.MDrum,
-  module Bang.Operators
+  module Bang.Operators,
+  module Bang.Music.Utils
 )where
 
 import Control.Monad
@@ -23,8 +24,7 @@ import Bang.Music
 import Bang.Music.MDrum
 import Bang.Interface.MDrum
 import Bang.Operators
-
--- @TODO: Composition -> Composition == Free Music (), for theorems
+import Bang.Music.Utils
 
 printComposition :: Composition -> IO ()
 printComposition (Pure _) = return ()

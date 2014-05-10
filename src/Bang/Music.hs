@@ -9,15 +9,7 @@ module Bang.Music (
   scanDurationF,
   mapDuration,
   mapDurationF,
-  polyrhythm,
   mergeCompositions,
-  rest, r, rt,
-  speedDiv, speedMult,
-  double, quad, oct,
-  dbl, qd, sm,
-  half, quarter, eighth, sixteenth, thirtysecond,
-  triplets, quintuplets,
-  sh, sq, se, sts, sd,
   module Bang.Music.Class
 ) where
 
@@ -26,17 +18,6 @@ import Bang.Music.MDrum
 import Control.Monad.Free
 import System.MIDI
 import Data.Ratio
-
--- |Rest for one beat.
-rest :: Composition
-rest  = liftF $ (Rest $ 1 % 4) ()
-
--- |Shorthand for `rest`
-r = rest
-
--- |Rest for a specified number of 32nd notes.
-rt :: Duration -> Composition
-rt d = liftF $ (Rest d) ()
 
 -- |Sets the duration for all notes in a `Composition`
 withDuration :: Duration -> Composition -> Composition
@@ -84,75 +65,6 @@ mergeCompositions a' b' = go 0 0 a' b'
           else do
             withDuration (sumA - sumB) (singleton b)
             go sumA (sumB + dur (value b)) a (nextBeat b)
-
--- |Create a polyrhythm with durations `n` and `m`
-polyrhythm :: (Integer, Composition) -> (Integer, Composition) -> Composition
-polyrhythm (n, c) (m, c') = (withDuration (1%n) c) `mergeCompositions` (withDuration (1%m) c')
-
--- |Speed up by a factor of `x`
-speedDiv :: Duration -> Composition -> Composition
-speedDiv x = mapDurationF (/x)
-
--- |Slow down by a factor of `x`
-speedMult :: Duration -> Composition -> Composition
-speedMult x = mapDurationF (*x)
-
--- |double the speed of a `Composition`
-double = speedDiv 2
-
--- |quadruple the speed of a `Composition`
-quad = speedDiv 4
-
--- |Multiply speed of a composition by 8
-oct = speedDiv 8
-
--- |Shorthand for `double`
-dbl = double
-
--- |Shorthand for `quad`
-qd = quad
-
--- |Shorthand for `speedDiv`
-sd = speedDiv
-
--- |half the speed of a `Composition`
-half = speedMult 2
-
--- |quarter the speed of a `Composition`
-quarter = speedMult 4
-
--- |divide the speed of a `Composition` by 8
-eighth = speedMult 8
-
--- |divide the speed of a `Composition` by 16
-sixteenth = speedMult 16
-
--- |divide the sped of a `Composition` by 32
-thirtysecond = speedMult 32
-
--- |Shorthand for `half`
-sh   = half
-
--- |Shorthand for `quarter`
-sq   = quarter
-
--- |Shorthand for `eighth`
-se   = eighth
-
--- |Shorthand for `sixteenth`
-sx   = sixteenth
-
--- |Shorthand for `thirtysecond`
-sts  = thirtysecond
-
--- |Shorthand for `speedMult`
-sm  = speedMult
-
--- |Turn quarter notes into triplets
-triplets = speedMult (4%3)
-
--- |Turn quarter notes into quintuplets
-quintuplets = speedMult (4%5)
 
 value :: Composition -> Music ()
 value (Pure _)              = End
