@@ -40,14 +40,14 @@ runComposition = do
   case evs of
     Pure _   -> return ()
     Free End -> return ()
-    Free x   -> do
+    a@(Free x)   -> do
       when (fromIntegral (round (dur x)) < t) $ do
         put (conn, nextBeat evs)
         case x of
           Rest d a -> return ()
           m@(MDrum _ _ _) -> do
             let MidiEvent s ev = drumToMidiEvent m
-            lift $ print (MidiEvent s ev)
+            lift $ print (value $ singleton a)
             lift $ send conn ev
       lift $ threadDelay 1000
       runComposition

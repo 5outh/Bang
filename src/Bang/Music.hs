@@ -44,45 +44,65 @@ scanDurationF f acc a@(Free x) = do
   liftF $ mapDuration (const acc) x
   scanDurationF f (dur (value a) `f` acc) (nextBeat a)
 
--- @TODO: Decide how to handle things like:
---        (sn >> (1/3) bd) & (sn >> 1/4 bd)
+-- Note: if we have a situation like this:
+--        (hc >> (1%3) bd) & (bd >> r)
+-- It's ambiguous what the duration of the final note should be.
+-- We choose the one with the larger duration. In this case, the (1%3) bd.
 mergeCompositions :: Composition -> Composition -> Composition
 mergeCompositions a' b' = go 0 0 a' b'
   where go :: Duration -> Duration -> Composition -> Composition -> Composition
-        go sumA sumB a          (Pure _)   = a >> return ()
-        go sumA sumB (Pure _)   b          = b >> return ()
+        go _    _    (Pure _)   (Pure _)   = return ()
+        
+        go sumA sumB a          (Pure _)   = a
+          --withDuration ((max sumA sumB) - (min sumA sumB)) (singleton a)
+          --go (sumA + dur (value a)) sumB (nextBeat a) (Pure ())
+        
+        go sumA sumB (Pure _)   b          = b
+          --withDuration ((max sumA sumB) - (min sumA sumB)) (singleton b)
+          --go sumA (sumB + dur (value b)) (Pure ()) (nextBeat b)
+        
         go sumA sumB a@(Free x) b@(Free y) = do
-          let goA = do
+          let da = dur (value a)
+              db = dur (value b)
+              goA = do
                 withDuration (sumB - sumA) (singleton a)
-                go (sumA + dur (value a)) sumB (nextBeat a) b
+                go (sumA + da) sumB (nextBeat a) b
               
               goB = do
                 withDuration (sumA - sumB) (singleton b)
-                go sumA (sumB + dur (value b)) a (nextBeat b)
-              
-              zeroRest r = case r of
-                Rest 0 _ -> True
-                _        -> False
+                go sumA (sumB + db) a (nextBeat b)
 
-              da = dur (value a)
-              db = dur (value b)
+          --case (x, y) of
+          --  (Rest d n, Rest d' m)        -> 
+          --    if d < d' then go (sumA + d) (sumB + d) n (liftF (Rest (d' - d) ()) >> m)
+          --    else if d > d' then go (sumA + d') (sumB + d') (liftF (Rest (d - d') ()) >> n) m
+          --    else go (sumA + d) (sumB + d') n m
+            
+          --  (Rest d n, MDrum dr d' m)     -> 
+          --    if d < d' then go (sumA + d) sumB n m
+          --    else if d > d' then do
+          --      singleton b
+          --      go (sumA + d') (sumB + d') (liftF (Rest (d - d') ()) >> n) m
+          --    else do -- equivalent
+          --      singleton b
+          --      go (sumA + d) (sumB + d') n m
 
-          case (zeroRest x, zeroRest y) of
-            (True, True)  -> go sumA sumB (nextBeat a) (nextBeat b)
-            (False, True) -> go sumA sumB a (nextBeat b)
-            (True, False) -> go sumA sumB (nextBeat a) b
-            (False, False) -> do 
-              if all (==0) [sumA, sumB] then do
-                -- go with the one with smallest delay, and if they're the same,
-                -- use the implicit order
-                if      da < db then goA 
-                else if da > db then goB
-                else if value a < value b then goB else goA
-              else if sumA < sumB then goA 
-                   else if sumB < sumA       then goB
-                   else if da < db           then goA 
-                   else if da > db           then goB
-                   else if value a < value b then goB else goA
+          --  (MDrum dr d n, Rest d' m)     ->
+          --    if d < d' then do
+          --      singleton a
+          --      go (sumA + d) (sumB + d) n (liftF (Rest (d' - d) ()) >> m)
+          --    else if d > d' then go sumA (sumB + d') a m
+          --    else do
+          --      singleton a
+          --      go (sumA + d) (sumB + d') n m
+            
+          --  (MDrum dr d _, MDrum dr' d' _) ->
+          if sumA < sumB       then goA 
+          else if sumB < sumA       then goB
+          else if da < db           then goA 
+          else if da > db           then goB
+          else if value a < value b then goA
+          else goB
 
 value :: Composition -> Music ()
 value (Pure _)              = End

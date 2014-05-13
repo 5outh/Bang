@@ -17,7 +17,7 @@ test = bang $ 120 <>> do
   quad   $ 8  $> (sn & hc & bd) >> bd
   oct    $ 16 $> (sn & hc & bd) >> bd
 
-doubleBass = bang $ 360 <>> double $ (triplets $ 3 $> bd) & cr
+doubleBass = bang $ 120 <>> double $ cr & (triplets $ 3 $> bd)
 
 poly = bang $ 120 <>> polyrhythm (3, 3 $> bd) (4, 4 $> sn)
 
