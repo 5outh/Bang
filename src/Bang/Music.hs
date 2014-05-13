@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor #-}
+{-# LANGUAGE DeriveFunctor, MultiWayIf #-}
 
 module Bang.Music (
   bpm,
@@ -71,38 +71,14 @@ mergeCompositions a' b' = go 0 0 a' b'
               goB = do
                 withDuration (sumA - sumB) (singleton b)
                 go sumA (sumB + db) a (nextBeat b)
-
-          --case (x, y) of
-          --  (Rest d n, Rest d' m)        -> 
-          --    if d < d' then go (sumA + d) (sumB + d) n (liftF (Rest (d' - d) ()) >> m)
-          --    else if d > d' then go (sumA + d') (sumB + d') (liftF (Rest (d - d') ()) >> n) m
-          --    else go (sumA + d) (sumB + d') n m
-            
-          --  (Rest d n, MDrum dr d' m)     -> 
-          --    if d < d' then go (sumA + d) sumB n m
-          --    else if d > d' then do
-          --      singleton b
-          --      go (sumA + d') (sumB + d') (liftF (Rest (d - d') ()) >> n) m
-          --    else do -- equivalent
-          --      singleton b
-          --      go (sumA + d) (sumB + d') n m
-
-          --  (MDrum dr d n, Rest d' m)     ->
-          --    if d < d' then do
-          --      singleton a
-          --      go (sumA + d) (sumB + d) n (liftF (Rest (d' - d) ()) >> m)
-          --    else if d > d' then go sumA (sumB + d') a m
-          --    else do
-          --      singleton a
-          --      go (sumA + d) (sumB + d') n m
-            
-          --  (MDrum dr d _, MDrum dr' d' _) ->
-          if sumA < sumB       then goA 
-          else if sumB < sumA       then goB
-          else if da < db           then goA 
-          else if da > db           then goB
-          else if value a < value b then goA
-          else goB
+          if | da == 0 -> singleton a >> go sumA sumB (nextBeat a) b
+             | db == 0 -> singleton b >> go sumA sumB a (nextBeat b)
+             | sumA < sumB       -> goA 
+             | sumB < sumA       -> goB
+             | da < db           -> goA 
+             | da > db           -> goB
+             | value a < value b -> goA
+             | otherwise         -> goB
 
 value :: Composition -> Music ()
 value (Pure _)              = End
