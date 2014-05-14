@@ -5,49 +5,46 @@ module Bang(
   bang,
   runComposition,
   module Bang.Music,
-  module Bang.Music.MDrum,
-  module Bang.Interface.MDrum,
-  module Bang.Interface.Base,
-  module Bang.Operators
+  module Bang.Music.Drum,
+  module Bang.Interface.Drum,
+  module Bang.Interface.Base
 )where
 
 import Control.Monad
-import Control.Monad.Free
 import Control.Monad.Trans
 import Control.Monad.Trans.State
 import Control.Concurrent
 
 import qualified System.MacOSX.CoreMIDI as OSX
 import System.MIDI
+import Bang.Music.Class
 import Bang.Music
-import Bang.Music.MDrum
-import Bang.Interface.MDrum
+import Bang.Music.Drum
+import Bang.Interface.Drum
 import Bang.Interface.Base
-import Bang.Operators
 
 -- |`play` a `Composition` over a given `Connection`
 play :: Connection -> Composition -> IO ()
 play conn c = do
   start conn
-  evalStateT runComposition (conn, c)
+  evalStateT runComposition (conn, toList c)
   close conn
 
 -- |Run a `Composition` by repeatedly updating the `Connection` and sending events as they come.
-runComposition :: StateT (Connection, Composition) IO ()
+runComposition :: StateT (Connection, [Music Duration]) IO ()
 runComposition = do
   (conn, evs) <- get
   t <- lift $ currentTime conn
   case evs of
-    Pure _   -> return ()
-    Free End -> return ()
-    a@(Free x)   -> do
+    []   -> return ()
+    (x:xs)   -> do
       when (fromIntegral (round (dur x)) < t) $ do
-        put (conn, nextBeat evs)
+        put (conn, xs)
         case x of
-          Rest d a -> return ()
-          m@(MDrum _ _ _) -> do
+          Rest d -> return ()
+          m@(MDrum _ _) -> do
             let MidiEvent s ev = drumToMidiEvent m
-            lift $ print (value $ singleton a)
+            lift $ print x
             lift $ send conn ev
       lift $ threadDelay 1000
       runComposition

@@ -22,6 +22,9 @@ scanDuration = go 0
         go acc (a :+: b) = go acc a :+: go (acc + sumDuration a) b
         go acc (a :=: b) = go acc a :=: go acc b
 
+bpm :: Integer -> Composition -> Composition
+bpm x = (fmap . fmap) (* (240000 % x)) . scanDuration
+
 toList :: Composition -> [Music Duration]
 toList (Prim a) = [a]
 toList (a :+: b) = toList a <> toList b
