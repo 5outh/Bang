@@ -61,21 +61,21 @@ hc = hiHat False
 -- |Shorthand for `hiHat True` (open)
 ho = hiHat True
 
-playBass, playSnare :: Delay -> MidiEvent
--- |A `MidiEvent` for a single bass drum beat with given `Delay`
+playBass, playSnare :: Integer -> MidiEvent
+-- |A `MidiEvent` for a single bass drum beat with given duration
 playBass  d = midiEvent d 35
--- |A `MidiEvent` for a single snare drum beat with given `Delay`
+-- |A `MidiEvent` for a single snare drum beat with given duration
 playSnare d = midiEvent d 38
 
--- |A `MidiEvent` for a single tom drum beat with given `TomType` and `Delay`
-playTom :: TomType -> Delay -> MidiEvent
+-- |A `MidiEvent` for a single tom drum beat with given `TomType` and duration
+playTom :: TomType -> Integer -> MidiEvent
 playTom t d = midiEvent d $ case t of
   Floor -> 43
   Hang1 -> 47
   Hang2 -> 50
 
--- |A `MidiEvent` for a single cymbal hit with given `CymbalType` and `Delay`
-playCymbal :: CymbalType -> Delay -> MidiEvent
+-- |A `MidiEvent` for a single cymbal hit with given `CymbalType` and duration
+playCymbal :: CymbalType -> Integer -> MidiEvent
 playCymbal c d = midiEvent d $ case c of
     Crash  -> 49
     Ride   -> 51
@@ -83,8 +83,8 @@ playCymbal c d = midiEvent d $ case c of
     China  -> 52
     Bell   -> 53
 
--- |A `MidiEvent` for a single hi-hat hit (open or closed) with given `Delay`
-playHiHat :: Bool -> Delay -> MidiEvent
+-- |A `MidiEvent` for a single hi-hat hit (open or closed) with given duration
+playHiHat :: Bool -> Integer -> MidiEvent
 playHiHat open d = midiEvent d $
   if open then 46 else 42
 

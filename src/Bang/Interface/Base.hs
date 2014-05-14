@@ -2,12 +2,11 @@ module Bang.Interface.Base where
 
 import Bang.Music
 import Bang.Music.Class
-import Control.Monad.Free
 import Data.Ratio
 
 -- |Rest for one beat.
 rest :: Composition
-rest  = liftF $ (Rest $ 1 % 4) ()
+rest  = Prim $ liftF $ (Rest $ 1 % 4) ()
 
 -- |Shorthand for `rest`
 r :: Composition
@@ -18,8 +17,8 @@ rt :: Duration -> Composition
 rt d = liftF $ (Rest d) ()
 
 -- |Create a polyrhythm with durations `n` and `m`
-polyrhythm :: (Integer, Composition) -> (Integer, Composition) -> Composition
-polyrhythm (n, c) (m, c') = (withDuration (1%n) c) `mergeCompositions` (withDuration (1%m) c')
+--polyrhythm :: (Integer, Composition) -> (Integer, Composition) -> Composition
+--polyrhythm (n, c) (m, c') = (withDuration (1%n) c) `mergeCompositions` (withDuration (1%m) c')
 
 -- |Sequence 4 compositions in line (special use case: create a 4/4 measure)
 measure4 :: Composition -> Composition -> Composition -> Composition -> Composition

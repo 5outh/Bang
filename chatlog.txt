@@ -1,0 +1,109 @@
+[22:13] == south [61509c55@gateway/web/freenode/ip.97.80.156.85] has joined #haskell
+[22:14] <south> Hi all!
+[22:14] <south> I have a quick question
+[22:14] == avalonalex [~avalonale@c-50-131-41-115.hsd1.ca.comcast.net] has quit [Quit: My MacBook Pro has gone to sleep. ZZZzzz…]
+[22:14] <jle`> hi south :)
+[22:14] <south> hey jle`!
+[22:15] == timemage [~user@unaffiliated/timemage] has joined #haskell
+[22:15] == jrvs [~textual@128.199.241.181] has quit [Quit: My MacBook Pro has gone to sleep. ZZZzzz…]
+[22:15] <south> So my question is basically this: I want to be able to represent two separate "programs" in a Free monad
+[22:16] <south> i.e. where I'd have something in lists like Unary [a], Binary [a] [a]
+[22:16] == subbyyy [~win@nat-204-14-239-210-sfo.net.salesforce.com] has quit [Ping timeout: 240 seconds]
+[22:17] <south> I basically want to be able to do things like Binary (a >> b) c
+[22:17] == studmuf [~studmuf@scpipc02.soe.ucsc.edu] has joined #haskell
+[22:17] == zz_flazz has changed nick to flazz
+[22:17] <south> but lifted into a Free monad, if that makes sense
+[22:17] <south> Is that possible?
+[22:17] == xl1 [~xl@106.37.184.22] has joined #haskell
+[22:17] <erisco> > Sum (5 :: Int) + Sum (6 :: Int)
+[22:17] <lambdabot>  Sum {getSum = 11}
+[22:18] <jle`> you know, I'm not really sure what you are trying to do.
+[22:18] <erisco> wait what? hmm this instance must be missing on my version
+[22:18] == firebird1 [~firebird@117.192.187.66] has quit [Ping timeout: 252 seconds]
+[22:18] <south> I'm trying to represent streams of music notes
+[22:18] == hoverbear [~hoverbear@unaffiliated/hoverbear] has quit []
+[22:18] <jle`> erisco: I don't have that either
+[22:18] <erisco> > (\i -> foldMap (uncurry (>>) . (guard . (/=i) *** pure)) . zip [0..]) 1 [1,2,3] :: Maybe (Sum Int)
+[22:18] <lambdabot>  Just (Sum {getSum = 4})
+[22:19] <jle`> hm
+[22:19] <south> And I'm able to use a free monad to sequence notes
+[22:19] <jle`> oh i have it on 7.8
+[22:19] <erisco> I thought that was an interesting generalisation :)
+[22:19] <erisco> some reason to use the foldMap solution anyhow
+[22:19] <jle`> sequencing notes sounds more like something for monoids
+[22:19] <south> but I want to be able to build a structure that allows me to concurrently execute them
+[22:19] <jle`> concurrently execute notes, like two voices?
+[22:20] <south> Yeah
+[22:20] <south> But the idea would be to have them represented purely and executed concurrently at runtime
+[22:20] == maxcan [~textual@38.122.182.106] has joined #haskell
+[22:20] <jle`> have you looked that that...what was that paper...
+[22:20] <jle`> "execute"?
+[22:20] == stian [~stian@198-91-165-2.cpe.distributel.net] has quit [Remote host closed the connection]
+[22:21] <south> I think I know what paper you're talking about, the one about polymorphic temporal media?
+[22:21] <south> I'm sort of trying to map that to a monad, because it results in really nice notation
+[22:21] <south> But the problem is that trying to merge compositions into a single sequence is actually kind of hard
+[22:22] <south> But it becomes easier if I can just concurrently interpret two separate streams at runtime
+[22:23] <jle`> hm i think it was http://www.cs.yale.edu/homes/hudak/Papers/HSoM.pdf but more recent
+[22:23] == jrvs [~textual@128.199.241.181] has joined #haskell
+[22:23] <jle`> where are these separate streams coming from? IO?
+[22:23] <south> Nah, they're built directly in haskell
+[22:23] == maattdd [~matthieu@esc31-1-78-245-92-71.fbx.proxad.net] has joined #haskell
+[22:23] <south> i.e. right now you can do something like bass >> sn >> ...
+[22:24] <jle`> and that composes them in parallel?
+[22:24] <south> No, that composes sequentially
+[22:24] == chatsiri_ [~chatsiri_@158.108.142.188] has joined #haskell
+[22:24] <south> Right now there's an operator that merges two (Free Music ())s
+[22:24] <south> in parallel
+[22:25] <south> But it's giving me a headache, so I'd like to put off the merge until runtime
+[22:25] == maxcan [~textual@38.122.182.106] has quit [Ping timeout: 276 seconds]
+[22:25] == Gurkenglas [~Gurkengla@dslb-188-106-113-116.pools.arcor-ip.net] has quit [Ping timeout: 255 seconds]
+[22:25] == yrdz [~p_adams@unaffiliated/p-adams/x-7117614] has joined #haskell
+[22:25] <south> Thanks for the paper!
+[22:25] == martinga_ [~textual@107-1-187-200-ip-static.hfc.comcastbusiness.net] has joined #haskell
+[22:26] <jle`> what do you mean put it off? hm.
+[22:26] <jle`> also, if your ntoes are all Music ()
+[22:26] == jrvs [~textual@128.199.241.181] has left #haskell []
+[22:26] == mithsv [~mithsv@035-170-128-083.dynamic.caiway.nl] has quit []
+[22:26] <jle`> it sounds like you might be better off with a Monoidal interface
+[22:26] <jle`> you can still use do notation with a monoidal interface using the Writer monad
+[22:26] == maxcan [~textual@38.122.182.106] has joined #haskell
+[22:26] <jle`> if you really really want do notation
+[22:27] <south> Oh cool, can you point me in the right direction?
+[22:27] <south> I really really do want do notation :)
+[22:27] <jle`> but i think that is considered an antipattern
+[22:27] * lahwran points south
+[22:27] <jle`> heh
+[22:27] <south> lol
+[22:27] <jle`> so you just make your line a monoid
+[22:28] <south> Ah yeah
+[22:28] <jle`> so g :: Part
+[22:28] <south> That makes sense actually
+[22:28] <jle`> g <> c :: Part
+[22:28] <jle`> <> :: Part -> Part -> Part
+[22:28] == maattdd [~matthieu@esc31-1-78-245-92-71.fbx.proxad.net] has quit [Ping timeout: 258 seconds]
+[22:28] == bms1 [~bms@c-69-255-18-229.hsd1.va.comcast.net] has joined #haskell
+[22:28] <south> That's a good idea. I'll explore it!
+[22:28] <south> Thanks jle`
+[22:28] <jle`> and you can have "part modifiers", like doublespeed :: Part -> Part, which turns a quarter note into a half note
+[22:29] <jle`> so doublespeed g <> c :: Part is a half note g and a quarter note c
+[22:29] == roconnor [~roconnor@e120-pool-d89a6b56.brdbnd.voicenetwork.ca] has quit [Quit: Konversation terminated!]
+[22:29] <jle`> and so if you wanted do notation
+[22:29] <jle`> you can have a Writer Part (); do { tell (doublespeed g); tell c; tell e }
+[22:29] <south> Ah, cool!
+[22:29] == Ralith [~ralith@66.114.129.162] has quit [Ping timeout: 276 seconds]
+[22:30] <jle`> but if you let go of do notation, you'll find you aren't missing much
+[22:30] <jle`> you can do, for example, mconcat [doublespeed g, c, e]
+[22:30] <jle`> i think HSoM takes a monoid approach...i think there is a more recent paper from this past year
+[22:30] <jle`> you still have the problem of parallely-combinging parts though
+[22:30] == martinga_ [~textual@107-1-187-200-ip-static.hfc.comcastbusiness.net] has quit [Ping timeout: 264 seconds]
+[22:30] <jle`> um i'm not sure how HSoM handles it
+[22:31] <jle`> but i'm sure they mention it in the paper
+[22:31] <south> Okay great, I'll give it a read
+[22:31] <south> Really helpful stuff!
+[22:31] == Ethix [~Ethix@c-68-32-246-114.hsd1.ms.comcast.net] has quit [Ping timeout: 258 seconds]
+[22:32] <jle`> if you see a lot of m ()'s, it's typically good sign that monad might be the best abstraction :)
+[22:33] == jedws [~textual@pa49-196-2-104.pa.vic.optusnet.com.au] has quit [Read error: Connection reset by peer]
+[22:33] <south> I'm gonna save this chat log
+[22:33] <south> and I'm headed to bed now
+[22:33] <south> Thanks again jle`
+[22:33] <erisco> LOG BOMB
