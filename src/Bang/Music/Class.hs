@@ -4,8 +4,7 @@ module Bang.Music.Class (
   Music(..),
   Media(..),
   Composition,
-  Duration,
-  value
+  Duration
 ) where
 
 import Bang.Music.MDrum
@@ -20,8 +19,12 @@ type Duration = Rational
 data Music a = 
    Rest  {dur :: a}
  | MDrum {drum :: Drum, dur :: a}
- | Zero
     deriving (Show, Eq, Ord, Functor)
+
+instance Applicative Music where
+  pure = Rest
+  (Rest f) <*> d     = f <$> d
+  (MDrum dr f) <*> d = f <$> d
 
 {-| LAWS:
  - a :+: (b :+: c) = (a :+: b) :+: c
@@ -42,20 +45,17 @@ data Media a =
     Media a :+: Media a -- sequential composition
   | Media a :=: Media a -- parallel composition
   | Prim a              -- Only one
+  | Zero                -- Nothing!
     deriving (Show, Eq, Ord, Functor)
-
-value :: Media a -> a
-value (Prim a)  = a
-value (a :+: _) = value a
-value (a :=: _) = value a
 
 type Composition = Media (Music Duration)
 
 instance Monoid Composition where
-  mempty  = Prim Zero
+  mempty  = Zero
   mappend = (:+:)
 
 instance Foldable Media where
+  foldMap f Zero     = mempty
   foldMap f (Prim a) = f a
   foldMap f (a :+: b) = foldMap f a `mappend` foldMap f b
   foldMap f (a :=: b) = foldMap f a `mappend` foldMap f b
