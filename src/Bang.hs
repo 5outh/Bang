@@ -14,6 +14,7 @@ import Control.Monad
 import Control.Monad.Trans
 import Control.Monad.Trans.State
 import Control.Concurrent
+import Data.Foldable(toList)
 
 import qualified System.MacOSX.CoreMIDI as OSX
 import System.MIDI

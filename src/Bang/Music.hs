@@ -25,10 +25,5 @@ scanDuration = go 0
 bpm :: Integer -> Composition -> Composition
 bpm x = (fmap . fmap) (* (240000 % x)) . scanDuration
 
-toList :: Composition -> [Music Duration]
-toList (Prim a) = [a]
-toList (a :+: b) = toList a <> toList b
-toList (a :=: b) = toList a <> toList b
-
 -- mapDurationF = fmap
 -- mapDuration  = fmap . fmap
