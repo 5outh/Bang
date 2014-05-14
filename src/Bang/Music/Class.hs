@@ -7,7 +7,7 @@ module Bang.Music.Class (
   Duration
 ) where
 
-import Bang.Music.MDrum
+import Bang.Music.Drum
 import Data.Monoid
 import Data.Foldable
 import Data.Traversable
@@ -19,7 +19,7 @@ type Duration = Rational
 data Music a = 
    Rest  {dur :: a}
  | MDrum {drum :: Drum, dur :: a}
-    deriving (Show, Eq, Ord, Functor)
+    deriving (Show, Eq, Ord, Functor) 
 
 instance Applicative Music where
   pure = Rest

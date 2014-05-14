@@ -1,4 +1,4 @@
-module Bang.Music.MDrum(
+module Bang.Music.Drum(
   Drum(..),
   TomType(..),
   CymbalType(..)
