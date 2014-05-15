@@ -1,8 +1,11 @@
 {-# LANGUAGE TypeSynonymInstances, FlexibleInstances #-}
 import Test.QuickCheck
 import Bang
+import Bang.Music.Class
 
 import Control.Applicative
+import Data.Foldable
+import Data.Monoid
 import Data.Ratio
 
 {- @TODO: Prove the eight laws of polymorphic temporal media:
@@ -55,59 +58,86 @@ import Data.Ratio
   m >> k = m >>= \_ -> k
 -}
 
+-- @TODO: Make these actual tests
 
 compos  = [snare, bass, rest, hc]
-seqs xs = (>>) <$> xs <*> xs
+seqs xs = (<>) <$> xs <*> xs
 ands xs = (&)  <$> xs <*> xs
+
+newtype Seq = Seq{ unSeq :: Composition}
+  deriving (Show, Eq)
+
+newtype And = And{ unAnd :: Composition}
+  deriving (Show, Eq)
 
 allCompos :: [Composition]
 allCompos = go 1 compos
   where go 0 xs = xs
         go n xs = go (n-1) $ ( (++) <$> seqs <*> ands ) (xs ++ map triplets xs)
 
+allSeqs :: [Seq]
+allSeqs = map Seq $ go 1 compos
+  where go 0 xs = xs
+        go n xs = go (n-1) $ (xs ++ seqs xs ++ map triplets xs)
+
+allAnds :: [And]
+allAnds = map And $ go 1 compos
+  where go 0 xs = xs
+        go n xs = go (n-1) $ (xs ++ ands xs ++ map triplets xs)
+
+instance Arbitrary Seq where
+  arbitrary = elements allSeqs
+
+instance Arbitrary And where
+  arbitrary = elements allAnds
+
 instance Arbitrary Composition where
   arbitrary = elements allCompos
 
 -- check
 associative_seq :: Composition -> Composition -> Composition -> Bool
-associative_seq c1 c2 c3 = ((c1 >> c2) >> c3) == (c1 >> (c2 >> c3))
+associative_seq c1 c2 c3 = 
+     toList ((c1 <> c2) <> c3)
+  == toList (c1 <> (c2 <> c3))
 
 -- incorrect, check a & (b & b) vs (a & b) & b
 associative_and :: Composition -> Composition -> Composition -> Bool
-associative_and c1 c2 c3 = ((c1 & c2) & c3) == (c1 & (c2 & c3))
+associative_and c1 c2 c3 = 
+     toList ((c1 & c2) & c3)
+  == toList (c1 & (c2 & c3))
+
+-- Not the right check
+commutative_and :: Composition -> Composition -> Bool
+commutative_and c1 c2 = toList (c1 & c2) == toList (c2 & c1)
 
 -- check
-symmetric_and :: Composition -> Composition -> Bool
-symmetric_and c1 c2 = (c1 & c2) == (c2 & c1)
+--right_zero :: Composition -> Bool
+--right_zero c = c == (c >> return ())
 
--- check
-right_zero :: Composition -> Bool
-right_zero c = c == (c >> return ())
-
--- check
-left_zero :: Composition -> Bool
-left_zero c = c == (return () >> c)
+---- check
+--left_zero :: Composition -> Bool
+--left_zero c = c == (return () >> c)
 
 -- This is absolutely incorrect,
 -- (withDuration 0 bd >> bd) & rt 1 == withDuration 0 (bd >> bd) >> rt 1
-rest_idempotency :: Composition -> Duration -> Bool
-rest_idempotency c d = (c & rt d) == c
+--rest_idempotency :: Composition -> Duration -> Bool
+--rest_idempotency c d = (c & rt d) == c
 
 switch :: Composition -> Composition -> Composition -> Composition -> Bool
-switch c1 c2 c3 c4 = ( (c1 >> c2) & (c3 >> c4) ) == ( (c1 & c3) >> (c2 & c4) )
+switch c1 c2 c3 c4 = ( (c1 <> c2) & (c3 <> c4) ) == ( (c1 & c3) <> (c2 & c4) )
 
 runTests = do
   putStrLn "Testing associative_seq"
   quickCheck associative_seq
   putStrLn "Testing associative_and"
   quickCheck associative_and
-  putStrLn "Testing symmetric_and"
-  quickCheck symmetric_and
-  putStrLn "Testing right_zero"
-  quickCheck right_zero
-  putStrLn "Testing left_zero"
-  quickCheck left_zero
-  putStrLn "Testing rest_idempotency"
-  quickCheck rest_idempotency
+  putStrLn "Testing commutative_and"
+  quickCheck commutative_and
+  --putStrLn "Testing right_zero"
+  --quickCheck right_zero
+  --putStrLn "Testing left_zero"
+  --quickCheck left_zero
+  --putStrLn "Testing rest_idempotency"
+  --quickCheck rest_idempotency
   putStrLn "Testing switch"
   quickCheck switch

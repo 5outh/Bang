@@ -5,6 +5,7 @@ module Bang(
   bang,
   runComposition,
   module Bang.Music,
+  module Bang.Music.Class,
   module Bang.Music.Drum,
   module Bang.Interface.Drum,
   module Bang.Interface.Base

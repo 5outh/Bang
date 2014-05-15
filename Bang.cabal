@@ -19,11 +19,10 @@ cabal-version:       >=1.10
 library
   exposed-modules:     Bang, 
                        Bang.Music, 
-                       Bang.Operators,  
                        Bang.Interface.Base,
-                       Bang.Interface.MDrum,
+                       Bang.Interface.Drum,
                        Bang.Music.Class, 
-                       Bang.Music.MDrum
+                       Bang.Music.Drum
   -- other-modules:       
   other-extensions:    DeriveFunctor, NoMonomorphismRestriction
   build-depends:       base >=4.6 && <4.7, 

@@ -1,7 +1,7 @@
 module Bang.Music where
 
 import Bang.Music.Class
-import Bang.Music.MDrum
+import Bang.Music.Drum
 import System.MIDI
 import Data.Ratio
 import Prelude hiding (foldr, foldl, foldr1, foldl1)

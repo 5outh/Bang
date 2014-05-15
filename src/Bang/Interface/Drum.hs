@@ -20,6 +20,42 @@ cymbal c = pure (MDrum (Cymbal c) (1%4))
 hiHat :: Bool -> Composition
 hiHat open = pure (MDrum (HiHat open) (1%4))
 
+-- |Shorthand for `snare`
+sn = snare
+
+-- |Shorthand for `bass`
+bd  = bass
+
+-- |Shorthand for `tom Hang1`
+t1 = tom Hang1
+
+-- |Shorthand for `tom Hang2`
+t2 = tom Hang2
+
+-- |Shorthand for `tom Floor`
+tf = tom Floor
+
+-- |Shorthand for `cymbal Crash`
+cc = cymbal Crash
+
+-- |Shorthand for `cymbal Ride`
+cr = cymbal Ride
+
+-- |Shorthand for `cymbal Splash`
+cs = cymbal Splash
+
+-- |Shorthand for `cymbal China`
+ch = cymbal China
+
+-- |Shorthand for `cymbal Bell`
+bl = cymbal Bell
+
+-- |Shorthand for `hiHat False` (closed)
+hc = hiHat False
+
+-- |Shorthand for `hiHat True` (open)
+ho = hiHat True
+
 playBass, playSnare :: Integer -> MidiEvent
 -- |A `MidiEvent` for a single bass drum beat with given duration
 playBass  d = midiEvent d 35
