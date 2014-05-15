@@ -16,6 +16,8 @@ import Control.Monad.Trans
 import Control.Monad.Trans.State
 import Control.Concurrent
 import Data.Foldable(toList)
+import Data.List(sortBy)
+import Data.Ord(comparing)
 
 import qualified System.MacOSX.CoreMIDI as OSX
 import System.MIDI
@@ -29,7 +31,7 @@ import Bang.Interface.Base
 play :: Connection -> Composition -> IO ()
 play conn c = do
   start conn
-  evalStateT runComposition (conn, toList c)
+  evalStateT runComposition (conn, interpret c)
   close conn
 
 -- |Run a `Composition` by repeatedly updating the `Connection` and sending events as they come.
