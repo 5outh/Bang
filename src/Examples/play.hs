@@ -2,16 +2,16 @@ import Bang
 import Data.Monoid
 import Data.Ratio
 
-simple = bang $ 120 !> ( (4 $> hc) & (bd <> r <> sn <> r) )
+simple = bang $ 120 @> ( (4 $> hc) & (bd <> r <> sn <> r) )
 
-complex = bang $ 240 !>
-     (bass & cc)
-  <> half
-    (  sn
-    <> (quad (4 $> (hc & bd) ))
-    <> sn & ho
-    <> bass & ch )
-  <> double ( 9 $> ((sn & hc) <> bd <> (sn & ho)) )
+--complex = bang $ 240 !>
+--     (bass & cc)
+--  <> half
+--    (  sn
+--    <> (quad (4 $> (hc & bd) ))
+--    <> sn & ho
+--    <> bass & ch )
+--  <> double ( 9 $> ((sn & hc) <> bd <> (sn & ho)) )
 
 --test = bang $ 120 <>> do
 --  double $ 4  $> (sn & hc)      >> bd
