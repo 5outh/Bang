@@ -1,6 +1,8 @@
 module Bang.Music.Class where
 
 import Data.Ratio
+import Data.Monoid
+import Data.Foldable
 
 type Dur = Rational
 
@@ -20,15 +22,26 @@ data Music a =
   | Modify Control (Music a)
     deriving (Show, Eq)
 
+instance Monoid (Music a) where
+  mappend = (:+:)
+  mempty = Prim (Rest 0)
+
 instance Functor Music where
   fmap f (Prim m) = Prim (fmap f m)
   fmap f (a :+: b) = fmap f a :+: fmap f b
   fmap f (a :=: b) = fmap f a :=: fmap f b
   fmap f (Modify c a) = Modify c (fmap f a)
 
+instance Foldable Music where
+  foldMap f (Prim (Rest _)) = mempty
+  foldMap f (Prim (Note _ a)) = f a 
+  foldMap f (a :+: b) = foldMap f a `mappend` foldMap f b
+  foldMap f (a :=: b) = foldMap f a `mappend` foldMap f b
+  foldMap f (Modify c a) = foldMap f a
+
 data Control = 
     BPM Integer               -- set the beats per minute
-  | Tempo Rational            -- set the time signature for a section of music
+  | Tempo Rational            -- set the time signature for a section of music (default 1/4)
   | Instrument InstrumentName -- Change the instrument (currently unused)
     deriving (Show, Eq)
 
