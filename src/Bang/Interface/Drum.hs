@@ -4,7 +4,7 @@ import Bang.Music.Class
 import Bang.Interface.Base
 import System.MIDI
 
-drum :: PercussionSound -> Dur -> Music PercussionSound
+drum :: PercussionSound -> Dur -> Music Dur PercussionSound
 drum ps d = Prim ( (Note d ps ) )
 
 toMIDINum :: PercussionSound -> Int
@@ -19,7 +19,7 @@ acousticBassDrum, bassDrum1, sideStick, acousticSnare,
             cowbell, hiBongo, lowConga, lowAgogo, longWhistle, hiWoodBlock, 
               muteTriangle, lowFloorTom , lowTom, crashCymbal1 , rideBell, 
                 crashCymbal2 , lowBongo, highTimbale, cabasa, shortGuiro, lowWoodBlock
-                :: Music PercussionSound
+                :: Music Dur PercussionSound
 acousticBassDrum = drum AcousticBassDrum (1/4)
 bassDrum1 = drum BassDrum1 (1/4)
 sideStick = drum SideStick (1/4)
@@ -68,5 +68,5 @@ cabasa = drum Cabasa (1/4)
 shortGuiro = drum ShortGuiro (1/4)
 lowWoodBlock = drum LowWoodBlock (1/4)
 
-drumToMidiEvent :: Primitive PercussionSound -> MidiEvent
+drumToMidiEvent :: Primitive Dur PercussionSound -> MidiEvent
 drumToMidiEvent (Note d ps) = MidiEvent (fromIntegral (round d)) (MidiMessage 10 (NoteOn (fromEnum ps + 35) 64))
