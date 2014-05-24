@@ -8,9 +8,9 @@ import Data.Bifoldable
 
 type Dur = Rational
 
-data Primitive dur a = 
-    Note dur a
-  | Rest dur
+data Primitive d a = 
+    Note {dur :: d, note :: a}
+  | Rest {dur :: d}
     deriving (Show, Eq)
 
 instance Functor (Primitive dur) where
@@ -62,6 +62,9 @@ instance Bifoldable Music where
   bifoldMap f g (a :+: b) = bifoldMap f g a `mappend` bifoldMap f g b
   bifoldMap f g (a :=: b) = bifoldMap f g a `mappend` bifoldMap f g b
   bifoldMap f g (Modify c a) = bifoldMap f g a
+
+foldDur :: (Num c) => (a -> c -> c) -> c -> Music a b -> c
+foldDur f = bifoldr f (const (const 0))
 
 data Control = 
     BPM Integer               -- set the beats per minute

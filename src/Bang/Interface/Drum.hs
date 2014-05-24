@@ -68,5 +68,8 @@ cabasa = drum Cabasa (1/4)
 shortGuiro = drum ShortGuiro (1/4)
 lowWoodBlock = drum LowWoodBlock (1/4)
 
+bd = bassDrum1
+sn = acousticSnare
+
 drumToMidiEvent :: Primitive Dur PercussionSound -> MidiEvent
 drumToMidiEvent (Note d ps) = MidiEvent (fromIntegral (round d)) (MidiMessage 10 (NoteOn (fromEnum ps + 35) 64))

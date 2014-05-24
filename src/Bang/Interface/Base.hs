@@ -22,6 +22,12 @@ note d x = Prim (Note d x)
 bpm :: Integer -> Music a b -> Music a b
 bpm n = Modify (BPM n)
 
+tempo :: Rational -> Music a b -> Music a b
+tempo n = Modify (Tempo n)
+
+half    = tempo 2
+whole   = tempo 4
+
 sr, er, qr, hr, wr :: Music Dur a
 sr = rest (1/16)
 er = rest (1/8)
