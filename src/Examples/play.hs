@@ -2,7 +2,7 @@ import Bang
 import Data.Monoid
 import Data.Ratio
 
-simple = bang $ 120 @> ( (4 $> hc) & (bd <> r <> sn <> r) )
+simple = bang $ 120 @> ( (4 #> hc) >< (bd <> qr <> sn <> qr) )
 
 --complex = bang $ 240 !>
 --     (bass & cc)
@@ -18,7 +18,7 @@ simple = bang $ 120 @> ( (4 $> hc) & (bd <> r <> sn <> r) )
 --  quad   $ 8  $> (sn & hc & bd) >> bd
 --  oct    $ 16 $> (sn & hc & bd) >> bd
 
---doubleBass = bang $ 120 <>> double $ cr & (triplets $ 3 $> bd)
+doubleBass = bang $ 480 @> ( hc >< (3 #> bassDrum2) )
 
 --poly = bang $ 120 <>> polyrhythm (3, 3 $> bd) (4, 4 $> sn)
 
@@ -39,10 +39,10 @@ simple = bang $ 120 @> ( (4 $> hc) & (bd <> r <> sn <> r) )
 --supernova = bang $ 240 <>> do
 --  2 $> quintuplets $ (bd >> sn >> (double $ 2$> bd >> sn) >> ho) & (4 $> hc)
 
---toxicity = bang $ 240 <>> do
---  let sh = sn & hc
+--toxicity = bang $ 240 @> do
+--  let sh = sn >< hc
 --  bd
---  double $ sh >> bd >> r >> bd >> sh >> r >> bd >> r >> sh >> r
+--  double $ sh <> bd <> r <> bd <> sh <> r <> bd <> r <> sh <> r
 --  double $ do 
 --    mapM_ (2 $>) [sn, t1, t2]
 --    double $ 4 $> sn

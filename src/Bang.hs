@@ -1,13 +1,21 @@
 
-module Bang where
+module Bang(
+  play
+, runComposition
+, bang
+, module Bang.Music.Operators
+, module Bang.Music.Class
+, module Bang.Interface.Base
+, module Bang.Interface.Drum
+)where
 
 import Control.Monad
 import Control.Monad.Trans
 import Control.Monad.Trans.State
 import Control.Concurrent
-
 import System.MIDI
 
+import Bang.Music.Operators
 import Bang.Music.Class
 import Bang.Interpreter as I
 import Bang.Interface.Base

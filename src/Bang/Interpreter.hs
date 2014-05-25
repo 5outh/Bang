@@ -20,7 +20,6 @@ interpret (Prim n@(Note _ _))       = [n]
 interpret (Prim n@(Rest _))         = []
 interpret (a :+: b)                 = interpret a `mappend` (map (\x -> x{dur = dur x + durA}) (interpret b))
   where durA       = duration a
-        intB@(h:_) = interpret b
 interpret (a :=: b)                 = interpret a `merge` interpret b
 
 merge :: Ord d => [Primitive d a] -> [Primitive d a] -> [Primitive d a]

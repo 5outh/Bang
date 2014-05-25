@@ -1,4 +1,7 @@
+{-# LANGUAGE NoMonomorphismRestriction #-}
 module Bang.Music.Class where
+
+import Prelude hiding(foldr)
 
 import Data.Ratio
 import Data.Monoid
@@ -9,7 +12,7 @@ import Data.Bifoldable
 type Dur = Rational
 
 data Primitive d a = 
-    Note {dur :: d, note :: a}
+    Note {dur :: d, ntype :: a}
   | Rest {dur :: d}
     deriving (Show, Eq)
 
@@ -24,6 +27,9 @@ data Music dur a =
   | Modify Control (Music dur a)
     deriving (Show, Eq)
 
+{-
+  NB. `Music` under `:=:` also forms a monoid, so we'll give these similar names...
+-}
 instance Num dur => Monoid (Music dur a) where
   mappend = (:+:)
   mempty = Prim (Rest 0)
@@ -72,58 +78,6 @@ data Control =
 data InstrumentName = DrumSet
   deriving (Show, Eq)
 
-data PercussionSound = 
-    AcousticBassDrum
-  | BassDrum1
-  | SideStick
-  | AcousticSnare
-  | ClosedHiHat
-  | OpenHiHat
-  | HighTom
-  | Tambourine
-  | Vibraslap
-  | MuteHiConga
-  | LowTimbale
-  | Maracas
-  | LongGuiro
-  | MuteCuica
-  | OpenTriangle
-  | HandClap
-  | HighFloorTom 
-  | LowMidTom
-  | RideCymbal1
-  | SplashCymbal 
-  | RideCymbal2
-  | OpenHiConga 
-  | HighAgogo
-  | ShortWhistle
-  | Claves
-  | OpenCuica
-  | ElectricSnare
-  | PedalHiHat
-  | HiMidTom
-  | ChineseCymbal 
-  | Cowbell
-  | HiBongo
-  | LowConga
-  | LowAgogo
-  | LongWhistle 
-  | HiWoodBlock 
-  | MuteTriangle
-  | LowFloorTom 
-  | LowTom
-  | CrashCymbal1 
-  | RideBell
-  | CrashCymbal2 
-  | LowBongo
-  | HighTimbale
-  | Cabasa
-  | ShortGuiro
-  | LowWoodBlock
-    deriving (Show,Eq,Ord,Enum)
-
-type MBang = Music Int
-
 duration :: (Num a, Ord a) => Music a b -> a
 duration (a :+: b) = foldDur (+) 0 a + duration b
 duration (a :=: b) = max (duration a) (duration b)
@@ -131,3 +85,15 @@ duration a         = foldDur (+) 0 a
 
 foldDur :: (Num c) => (a -> c -> c) -> c -> Music a b -> c
 foldDur f = bifoldr f (const (const 0))
+
+-- a "second monoid instance" without a newtype wrapper for `Num dur => Music dur`.
+-- `c` for `concurrent`.
+cappend :: Music dur a -> Music dur a -> Music dur a
+cappend = (:=:)
+cempty :: Num dur => Music dur a
+cempty  = Prim (Rest 0)
+cconcat :: Num dur => [Music dur a] -> Music dur a
+cconcat = foldr cappend cempty
+-- parallel of `<>`
+(><) :: Music dur a -> Music dur a -> Music dur a
+(><) = cappend
