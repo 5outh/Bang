@@ -18,15 +18,10 @@ interpret (Modify (BPM n)   m)      = interpret (first (* (240000 % n)) m) -- br
 interpret (Modify (Instrument _) m) = interpret m -- @TODO
 interpret (Prim n@(Note _ _))       = [n]
 interpret (Prim n@(Rest _))         = []
-interpret (a :+: b)                 = interpret a `mappend` (map (\x -> x{dur = dur x + durA - dur h}) (interpret b))
+interpret (a :+: b)                 = interpret a `mappend` (map (\x -> x{dur = dur x + durA}) (interpret b))
   where durA       = duration a
         intB@(h:_) = interpret b
 interpret (a :=: b)                 = interpret a `merge` interpret b
-
-duration :: (Num a, Ord a) => Music a b -> a
-duration (a :+: b) = foldDur (+) 0 a + foldDur (+) 0 b
-duration (a :=: b) = max (foldDur (+) 0 a) (foldDur (+) 0 b)
-duration a         = foldDur (+) 0 a
 
 merge :: Ord d => [Primitive d a] -> [Primitive d a] -> [Primitive d a]
 merge [] ys = ys

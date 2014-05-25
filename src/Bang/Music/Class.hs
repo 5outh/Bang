@@ -63,9 +63,6 @@ instance Bifoldable Music where
   bifoldMap f g (a :=: b) = bifoldMap f g a `mappend` bifoldMap f g b
   bifoldMap f g (Modify c a) = bifoldMap f g a
 
-foldDur :: (Num c) => (a -> c -> c) -> c -> Music a b -> c
-foldDur f = bifoldr f (const (const 0))
-
 data Control = 
     BPM Integer               -- set the beats per minute
   | Tempo Rational            -- set the speed for a section of music (default 1)
@@ -126,3 +123,11 @@ data PercussionSound =
     deriving (Show,Eq,Ord,Enum)
 
 type MBang = Music Int
+
+duration :: (Num a, Ord a) => Music a b -> a
+duration (a :+: b) = foldDur (+) 0 a + duration b
+duration (a :=: b) = max (duration a) (duration b)
+duration a         = foldDur (+) 0 a
+
+foldDur :: (Num c) => (a -> c -> c) -> c -> Music a b -> c
+foldDur f = bifoldr f (const (const 0))
