@@ -18,27 +18,24 @@ simple = bang $ 120 @> ( (4 #> hc) >< (bd <> qr <> sn <> qr) )
 --  quad   $ 8  $> (sn & hc & bd) >> bd
 --  oct    $ 16 $> (sn & hc & bd) >> bd
 
-doubleBass = bang $ 480 @> ( hc >< (3 #> bassDrum2) )
+doubleBass = bang $ 240 @> double $ triplets ( hc >< (3 #> bassDrum2) )
 
 --poly = bang $ 120 <>> polyrhythm (3, 3 $> bd) (4, 4 $> sn)
 
 --quints = bang $ 480 <>> quintuplets $ (hc & bd) >> (4 $> bd)
 
---amanda = bang $ 120 <>> do
---  4 $> bd
---  4 $> double $ bd >> hc
---  4 $> quad   $ bd >> hc
---  2 $> bd
+amanda = mconcat
+  [ 4 #> bd
+  , 4 #> double $ bd <> hc
+  , 4 #> quad   $ bd <> hc
+  , 2 #> bd
+  ] 
 
 --wonko = bang $ 120 ^> do
 --  bass & cc
 --  sn & bd
 --  bass & hc
 --  sn & ho
-
---supernova = bang $ 240 <>> do
---  2 $> quintuplets $ (bd >> sn >> (double $ 2$> bd >> sn) >> ho) & (4 $> hc)
-
 --toxicity = bang $ 240 @> do
 --  let sh = sn >< hc
 --  bd

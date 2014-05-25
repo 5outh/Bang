@@ -78,9 +78,10 @@ data Control =
 data InstrumentName = DrumSet
   deriving (Show, Eq)
 
-duration :: (Num a, Ord a) => Music a b -> a
+duration :: (Fractional a, Ord a) => Music a b -> a
 duration (a :+: b) = foldDur (+) 0 a + duration b
 duration (a :=: b) = max (duration a) (duration b)
+duration (Modify (Tempo n) m) = duration (first (* fromRational n) m)
 duration a         = foldDur (+) 0 a
 
 foldDur :: (Num c) => (a -> c -> c) -> c -> Music a b -> c
@@ -95,5 +96,6 @@ cempty  = Prim (Rest 0)
 cconcat :: Num dur => [Music dur a] -> Music dur a
 cconcat = foldr cappend cempty
 -- parallel of `<>`
+infixr 6 ><
 (><) :: Music dur a -> Music dur a -> Music dur a
 (><) = cappend

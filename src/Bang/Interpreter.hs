@@ -9,8 +9,7 @@ import Data.Ratio
 import Data.Monoid
 
 toList :: Music Dur PercussionSound -> [MidiEvent]
-toList m = map drumToMidiEvent itpd
-  where itpd@(x:_) = interpret m
+toList m = map drumToMidiEvent (interpret m)
 
 interpret :: Music Dur PercussionSound -> [Primitive Dur PercussionSound]
 interpret (Modify (Tempo a) m)      = interpret (first (*a) m)

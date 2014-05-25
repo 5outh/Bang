@@ -6,9 +6,9 @@ import Data.Monoid
 showMusic :: (Show a, Show b) => Music a b -> String
 showMusic = go ""
   where go spcs (Prim m)     = spcs <> show m
-        go spcs (a :+: b)    = mconcat [spcs, go (' ': spcs) a, "\n", spcs, ":+:", "\n", spcs, go (' ': spcs) b]
-        go spcs (a :=: b)    = mconcat [spcs, go (' ': spcs) a, "\n", spcs, ":=:", "\n", spcs, go (' ': spcs) b]
-        go spcs (Modify c a) = show c <> "\n" <> go spcs a
+        go spcs (a :+: b)    = mconcat [go (' ': spcs) a, "\n", spcs, ":+:", "\n", go (' ': spcs) b]
+        go spcs (a :=: b)    = mconcat [go (' ': spcs) a, "\n", spcs, ":=:", "\n", go (' ': spcs) b]
+        go spcs (Modify c a) = spcs <> show c <> "\n" <> go spcs a
 
 printMusic :: (Show a, Show b) => Music a b -> IO ()
 printMusic = putStrLn . showMusic
