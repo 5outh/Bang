@@ -9,19 +9,18 @@ import Data.Ratio
 import Data.Monoid
 
 toList :: Music Dur PercussionSound -> [MidiEvent]
-toList m = map (drumToMidiEvent . f) itpd
+toList m = map drumToMidiEvent itpd
   where itpd@(x:_) = interpret m
-        f a = a{ dur = dur a - dur x }
 
--- @TODO: Finish
 interpret :: Music Dur PercussionSound -> [Primitive Dur PercussionSound]
 interpret (Modify (Tempo a) m)      = interpret (first (*a) m)
 interpret (Modify (BPM n)   m)      = interpret (first (* (240000 % n)) m) -- breaks down when bpm has already been set
 interpret (Modify (Instrument _) m) = interpret m -- @TODO
 interpret (Prim n@(Note _ _))       = [n]
 interpret (Prim n@(Rest _))         = []
-interpret (a :+: b)                 = interpret a `mappend` (map (\x -> x{dur = dur x + durA}) (interpret b))
-  where durA = duration a
+interpret (a :+: b)                 = interpret a `mappend` (map (\x -> x{dur = dur x + durA - dur h}) (interpret b))
+  where durA       = duration a
+        intB@(h:_) = interpret b
 interpret (a :=: b)                 = interpret a `merge` interpret b
 
 duration :: (Num a, Ord a) => Music a b -> a
