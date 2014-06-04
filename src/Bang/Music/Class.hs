@@ -79,10 +79,12 @@ data InstrumentName = DrumSet
   deriving (Show, Eq)
 
 duration :: (Fractional a, Ord a) => Music a b -> a
-duration (a :+: b) = foldDur (+) 0 a + duration b
+duration (a :+: b) = duration a + duration b
 duration (a :=: b) = max (duration a) (duration b)
 duration (Modify (Tempo n) m) = duration (first (* fromRational n) m)
-duration a         = foldDur (+) 0 a
+duration (Modify _ m) = duration m
+duration (Prim (Note d a)) = d
+duration (Prim (Rest d)) = d
 
 foldDur :: (Num c) => (a -> c -> c) -> c -> Music a b -> c
 foldDur f = bifoldr f (const (const 0))

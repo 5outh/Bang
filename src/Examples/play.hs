@@ -24,11 +24,10 @@ doubleBass = bang $ 240 @> double $ triplets ( hc >< (3 #> bassDrum2) )
 
 --quints = bang $ 480 <>> quintuplets $ (hc & bd) >> (4 $> bd)
 
-amanda = 240 %>
-  (lowAgogo
-  <> (bd <> hc)
-  <> (bd <> hc)
-  <> (bd) )
+amanda = 240 @> mconcat
+  [ 2 #> lowAgogo
+  , double $ 4 #> (bd >< hc)
+  ]
 
 --wonko = bang $ 120 ^> do
 --  bass & cc
