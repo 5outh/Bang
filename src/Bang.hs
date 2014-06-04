@@ -35,15 +35,15 @@ runComposition = do
   (conn, evs) <- get
   t <- lift $ currentTime conn
   case evs of
+    [] -> return ()
     (e@(Note _ _):xs) -> do
       let x@(MidiEvent s ev) = drumToMidiEvent e
       when (s < t) $ do
         put (conn, xs)
         lift $ print x
         lift $ send conn ev
-    _ -> return ()
-  lift $ threadDelay 1000
-  runComposition
+      lift $ threadDelay 1000
+      runComposition
 
 -- |Play a `Composition` over the first system `Destination` for MIDI events
 bang :: Music Dur PercussionSound -> IO ()
