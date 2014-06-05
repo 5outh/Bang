@@ -20,3 +20,10 @@ n @> m = bpm n (mconcat $ repeat m)
 infixr 0 #>
 (#>) :: Num a => Int -> Music a b -> Music a b
 n #> m = mconcat $ replicate n m
+
+mconcatMap :: Monoid b => (a -> b) -> [a] -> b
+mconcatMap f = mconcat . map f
+
+infixl 1 >>~
+(>>~) :: Monoid b => (a -> b) -> [a] -> b
+(>>~) = mconcatMap

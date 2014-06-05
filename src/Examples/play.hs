@@ -37,19 +37,23 @@ amanda = 240 @> mconcat
 
 toxicity = 
   let sh = sn >< hc 
-  in bang $ 240 @> mconcat[
-  bd
-  , double $ sh <> bd <> qr <> bd <> sh <> qr <> bd <> qr <> sh <> qr
-  , double $ mconcat [ 
-      mconcat $ map (2 #>) [sn, t1, t2]
-    , double $ 4 #> sn
-    , mconcat $ map (2 #>) [sn, t1, t2] ]
-  , double $ mconcat [
-      m4 (bd >< cc) qr  hc        sn
-    , m4 hc        bd sh        qr
-    , m4 hc        sn (bd >< hc) qr
-    , m4 (bd >< hc) qr  hc        sh
-    , m4 hc        bd sh        qr
-    , m4 bd        qr  sh        qr ] ]
+  in bang $ 240 @>
+     bd
+  <> (double $ mconcat [
+      mconcat [sh, bd, qr, bd, sh, qr, bd, qr, sh, qr]
+    , mconcat [ 
+        (2 #>) >>~ [sn, t1, t2]
+      , double $ 4 #> sn
+      , (2 #>) >>~ [sn, t1, t2] 
+      ]
+    , mconcat [
+        m4 (bd >< cc) qr  hc         sn
+      , m4 hc          bd sh         qr
+      , m4 hc          sn (bd >< hc) qr
+      , m4 (bd >< hc)  qr hc         sh
+      , m4 hc          bd sh         qr
+      , m4 bd          qr sh         qr 
+      ] 
+    ])
 
 --mirrorify = bang $ 480 <>> mirror $ 2 $> mapM_ (4 $>) [sn, t2, t1, tf, bd]
