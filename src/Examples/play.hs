@@ -34,20 +34,22 @@ amanda = 240 @> mconcat
 --  sn & bd
 --  bass & hc
 --  sn & ho
---toxicity = bang $ 240 @> do
---  let sh = sn >< hc
---  bd
---  double $ sh <> bd <> r <> bd <> sh <> r <> bd <> r <> sh <> r
---  double $ do 
---    mapM_ (2 $>) [sn, t1, t2]
---    double $ 4 $> sn
---    mapM_ (2 $>) [sn, t1, t2]
---  double $ do
---    m4 (bd & cc) r  hc        sn
---    m4 hc        bd sh        r
---    m4 hc        sn (bd & hc) r
---    m4 (bd & hc) r  hc        sh
---    m4 hc        bd sh        r
---    m4 bd        r  sh        r
+
+toxicity = 
+  let sh = sn >< hc 
+  in bang $ 240 @> mconcat[
+  bd
+  , double $ sh <> bd <> qr <> bd <> sh <> qr <> bd <> qr <> sh <> qr
+  , double $ mconcat [ 
+      mconcat $ map (2 #>) [sn, t1, t2]
+    , double $ 4 #> sn
+    , mconcat $ map (2 #>) [sn, t1, t2] ]
+  , double $ mconcat [
+      m4 (bd >< cc) qr  hc        sn
+    , m4 hc        bd sh        qr
+    , m4 hc        sn (bd >< hc) qr
+    , m4 (bd >< hc) qr  hc        sh
+    , m4 hc        bd sh        qr
+    , m4 bd        qr  sh        qr ] ]
 
 --mirrorify = bang $ 480 <>> mirror $ 2 $> mapM_ (4 $>) [sn, t2, t1, tf, bd]
