@@ -1,16 +1,24 @@
 
-module Bang where
+module Bang(
+  play
+, runComposition
+, bang
+, module Bang.Music.Operators
+, module Bang.Music.Class
+, module Bang.Interface.Base
+, module Bang.Interface.Drum
+, module Bang.Interpreter
+)where
 
 import Control.Monad
 import Control.Monad.Trans
 import Control.Monad.Trans.State
 import Control.Concurrent
-
-import qualified System.MacOSX.CoreMIDI as OSX
 import System.MIDI
 
+import Bang.Music.Operators
 import Bang.Music.Class
-import Bang.Interpreter as I
+import Bang.Interpreter
 import Bang.Interface.Base
 import Bang.Interface.Drum
 
@@ -18,17 +26,18 @@ import Bang.Interface.Drum
 play :: Connection -> Music Dur PercussionSound -> IO ()
 play conn song = do
   start conn
-  evalStateT runComposition (conn, I.toList song)
+  evalStateT runComposition (conn, interpret' song)
   close conn
 
 -- |Run a `Composition` by repeatedly updating the `Connection` and sending events as they come.
-runComposition :: StateT (Connection, [MidiEvent]) IO ()
+runComposition :: StateT (Connection, [Primitive Dur PercussionSound]) IO ()
 runComposition = do
   (conn, evs) <- get
   t <- lift $ currentTime conn
   case evs of
     [] -> return ()
-    (x@(MidiEvent s ev):xs)   -> do
+    (e@(Note _ _):xs) -> do
+      let x@(MidiEvent s ev) = drumToMidiEvent e
       when (s < t) $ do
         put (conn, xs)
         lift $ print x

@@ -1,4 +1,7 @@
+{-# LANGUAGE NoMonomorphismRestriction #-}
 module Bang.Music.Class where
+
+import Prelude hiding(foldr)
 
 import Data.Ratio
 import Data.Monoid
@@ -9,7 +12,7 @@ import Data.Bifoldable
 type Dur = Rational
 
 data Primitive d a = 
-    Note {dur :: d, note :: a}
+    Note {dur :: d, ntype :: a}
   | Rest {dur :: d}
     deriving (Show, Eq)
 
@@ -24,6 +27,9 @@ data Music dur a =
   | Modify Control (Music dur a)
     deriving (Show, Eq)
 
+{-
+  NB. `Music` under `:=:` also forms a monoid, so we'll give these similar names...
+-}
 instance Num dur => Monoid (Music dur a) where
   mappend = (:+:)
   mempty = Prim (Rest 0)
@@ -63,9 +69,6 @@ instance Bifoldable Music where
   bifoldMap f g (a :=: b) = bifoldMap f g a `mappend` bifoldMap f g b
   bifoldMap f g (Modify c a) = bifoldMap f g a
 
-foldDur :: (Num c) => (a -> c -> c) -> c -> Music a b -> c
-foldDur f = bifoldr f (const (const 0))
-
 data Control = 
     BPM Integer               -- set the beats per minute
   | Tempo Rational            -- set the speed for a section of music (default 1)
@@ -75,54 +78,26 @@ data Control =
 data InstrumentName = DrumSet
   deriving (Show, Eq)
 
-data PercussionSound = 
-    AcousticBassDrum
-  | BassDrum1
-  | SideStick
-  | AcousticSnare
-  | ClosedHiHat
-  | OpenHiHat
-  | HighTom
-  | Tambourine
-  | Vibraslap
-  | MuteHiConga
-  | LowTimbale
-  | Maracas
-  | LongGuiro
-  | MuteCuica
-  | OpenTriangle
-  | HandClap
-  | HighFloorTom 
-  | LowMidTom
-  | RideCymbal1
-  | SplashCymbal 
-  | RideCymbal2
-  | OpenHiConga 
-  | HighAgogo
-  | ShortWhistle
-  | Claves
-  | OpenCuica
-  | ElectricSnare
-  | PedalHiHat
-  | HiMidTom
-  | ChineseCymbal 
-  | Cowbell
-  | HiBongo
-  | LowConga
-  | LowAgogo
-  | LongWhistle 
-  | HiWoodBlock 
-  | MuteTriangle
-  | LowFloorTom 
-  | LowTom
-  | CrashCymbal1 
-  | RideBell
-  | CrashCymbal2 
-  | LowBongo
-  | HighTimbale
-  | Cabasa
-  | ShortGuiro
-  | LowWoodBlock
-    deriving (Show,Eq,Ord,Enum)
+duration :: (Fractional a, Ord a) => Music a b -> a
+duration (a :+: b) = duration a + duration b
+duration (a :=: b) = max (duration a) (duration b)
+duration (Modify (Tempo n) m) = duration (first (* fromRational n) m)
+duration (Modify _ m) = duration m
+duration (Prim (Note d a)) = d
+duration (Prim (Rest d)) = d
 
-type MBang = Music Int
+foldDur :: (Num c) => (a -> c -> c) -> c -> Music a b -> c
+foldDur f = bifoldr f (const (const 0))
+
+-- a "second monoid instance" without a newtype wrapper for `Num dur => Music dur`.
+-- `c` for `concurrent`.
+cappend :: Music dur a -> Music dur a -> Music dur a
+cappend = (:=:)
+cempty :: Num dur => Music dur a
+cempty  = Prim (Rest 0)
+cconcat :: Num dur => [Music dur a] -> Music dur a
+cconcat = foldr cappend cempty
+-- parallel of `<>`
+infixr 6 ><
+(><) :: Music dur a -> Music dur a -> Music dur a
+(><) = cappend
