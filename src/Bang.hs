@@ -5,6 +5,7 @@ module Bang(
 , bang
 , module Bang.Music.Operators
 , module Bang.Music.Class
+, module Bang.Music.Transform
 , module Bang.Interface.Base
 , module Bang.Interface.Drum
 , module Bang.Interpreter
@@ -18,6 +19,7 @@ import System.MIDI
 
 import Bang.Music.Operators
 import Bang.Music.Class
+import Bang.Music.Transform
 import Bang.Interpreter
 import Bang.Interface.Base
 import Bang.Interface.Drum

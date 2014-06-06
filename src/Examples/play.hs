@@ -5,11 +5,12 @@ import Data.Ratio
 simple = bang $ 120 @> ( (4 #> hc) >< (bd <> qr <> sn <> qr) )
 
 complex = bang $ 240 %>
+  mirror $ 
   mconcat [
-    (bd >< cc)
+    bd >< cc
   , half $ mconcat [
     sn
-    , quad (4 #> (hc >< bd) )
+    , quad ( 4 #> (hc >< bd) )
     , sn >< ho
     , bd >< chineseCymbal
     ]
@@ -19,20 +20,14 @@ complex = bang $ 240 %>
 
 doubleBass = bang $ 240 @> double $ triplets ( hc >< (3 #> bassDrum2) )
 
---poly = bang $ 120 <>> polyrhythm (3, 3 $> bd) (4, 4 $> sn)
+poly = bang $ 120 %> (triplets $ 3 #> bd) >< (4 #> sn)
 
---quints = bang $ 480 <>> quintuplets $ (hc & bd) >> (4 $> bd)
+quints = bang $ 480 @> quintuplets $ (hc >< bd) <> (4 #> bd)
 
 amanda = 240 @> mconcat
   [ 2 #> lowAgogo
   , double $ 4 #> (bd >< hc)
   ]
-
---wonko = bang $ 120 ^> do
---  bass & cc
---  sn & bd
---  bass & hc
---  sn & ho
 
 toxicity = 
   let sh = sn >< hc 
@@ -54,5 +49,3 @@ toxicity =
       , m4 bd          qr sh         qr 
       ] 
     ])
-
---mirrorify = bang $ 480 <>> mirror $ 2 $> mapM_ (4 $>) [sn, t2, t1, tf, bd]
