@@ -6,7 +6,7 @@ import Data.Monoid
 
 reverseMusic :: Music Dur b -> Music Dur b
 reverseMusic p@(Prim _) = p
-reverseMusic (a :+: b) = reverseMusic b :+: a
+reverseMusic (a :+: b) = reverseMusic b :+: reverseMusic a
 reverseMusic (a :=: b) =
   if durA < durB then (rest diff :+: reverseMusic a) :=: reverseMusic b
   else if durB < durA then reverseMusic a :=: (rest diff :+: reverseMusic b)
@@ -18,6 +18,9 @@ reverseMusic m@(Modify c a) = Modify c (reverseMusic a)
 mirror :: Music Dur b -> Music Dur b
 mirror m = m <> reverseMusic m
 
+cross :: Music Dur b -> Music Dur b
+cross m = m >< reverseMusic m
+
 takeDur :: Dur -> Music Dur a -> Music Dur a
 takeDur d = go d
   where go dr m | dr <= 0 = rest (abs dr)
@@ -26,3 +29,4 @@ takeDur d = go d
                     (a :+: b)    -> (go dr a) :+: (go (dr - duration a) b)
                     (a :=: b)    -> (go dr a) :=: (go dr b)
                     (Modify c a) -> Modify c (go dr a)
+

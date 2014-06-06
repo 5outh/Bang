@@ -22,8 +22,8 @@ interpret :: Music Dur PercussionSound -> [Primitive Dur PercussionSound]
 interpret = go 0
   where go d (a :+: b) = (go d a) `mappend` (go (d + duration a) b)
         go d (a :=: b) = (go d a) `merge` (go d b)
-        go d (Prim n@(Note _ _)) = [n{dur = d}]
-        go d (Prim n@(Rest _))  = []
+        go d (Prim n@(Note _ _))       = [n{dur = d}]
+        go d (Prim n@(Rest _))         = []
         go d (Modify (Tempo a) m)      = go d (first (*a) m)
         go d (Modify (BPM n)   m)      = go d (first (* (240000 % n)) m) -- breaks down when bpm has already been set
         go d (Modify (Instrument _) m) = go d m -- @TODO
