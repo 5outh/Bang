@@ -40,6 +40,9 @@ dropDur d = go d
                     (a :=: b)    -> (go dr a) :=: (go dr b)
                     (Modify c a) -> Modify c (go dr a)
 
+partitionDur :: Dur -> Music Dur b -> (Music Dur b, Music Dur b)
+partitionDur d m = (takeDur d m, dropDur d m)
+
 hushFor :: Dur -> Music Dur b -> Music Dur b
 hushFor d m = rest d <> dropDur d m
 

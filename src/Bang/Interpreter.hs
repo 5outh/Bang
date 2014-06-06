@@ -27,3 +27,4 @@ interpret = go 0
         go d (Modify (Tempo a) m)      = go d (first (*a) m)
         go d (Modify (BPM n)   m)      = go d (first (* (240000 % n)) m) -- breaks down when bpm has already been set
         go d (Modify (Instrument _) m) = go d m -- @TODO
+
