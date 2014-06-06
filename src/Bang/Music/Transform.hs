@@ -17,3 +17,12 @@ reverseMusic m@(Modify c a) = Modify c (reverseMusic a)
 
 mirror :: Music Dur b -> Music Dur b
 mirror m = m <> reverseMusic m
+
+takeDur :: Dur -> Music Dur a -> Music Dur a
+takeDur d = go d
+  where go dr m | dr <= 0 = rest (abs dr)
+                | otherwise = case m of
+                    p@(Prim _)   -> p
+                    (a :+: b)    -> (go dr a) :+: (go (dr - duration a) b)
+                    (a :=: b)    -> (go dr a) :=: (go dr b)
+                    (Modify c a) -> Modify c (go dr a)
