@@ -4,19 +4,18 @@ import Data.Ratio
 
 simple = bang $ 120 @> ( (4 #> hc) >< (bd <> qr <> sn <> qr) )
 
---complex = bang $ 240 !>
---     (bass & cc)
---  <> half
---    (  sn
---    <> (quad (4 $> (hc & bd) ))
---    <> sn & ho
---    <> bass & ch )
---  <> double ( 9 $> ((sn & hc) <> bd <> (sn & ho)) )
-
---test = bang $ 120 <>> do
---  double $ 4  $> (sn & hc)      >> bd
---  quad   $ 8  $> (sn & hc & bd) >> bd
---  oct    $ 16 $> (sn & hc & bd) >> bd
+complex = bang $ 240 %>
+  mconcat [
+    (bd >< cc)
+  , half $ mconcat [
+    sn
+    , quad (4 #> (hc >< bd) )
+    , sn >< ho
+    , bd >< chineseCymbal
+    ]
+  , quad $ triplets ( 8 #> ((sn >< hc) <> bd <> bd) )
+  , bd >< crashCymbal1
+  ]
 
 doubleBass = bang $ 240 @> double $ triplets ( hc >< (3 #> bassDrum2) )
 

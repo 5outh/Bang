@@ -26,7 +26,7 @@ import Bang.Interface.Drum
 play :: Connection -> Music Dur PercussionSound -> IO ()
 play conn song = do
   start conn
-  evalStateT runComposition (conn, interpret' song)
+  evalStateT runComposition (conn, interpret song)
   close conn
 
 -- |Run a `Composition` by repeatedly updating the `Connection` and sending events as they come.
