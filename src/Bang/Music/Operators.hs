@@ -10,9 +10,9 @@ infixr 0 !>
 (!>) :: Rational -> Music a b -> Music a b
 (!>) = tempo
 
-infixr 0 #>
+infixr 1 #>
 (#>) :: Num a => Int -> Music a b -> Music a b
-n #> m = mconcat $ replicate n m
+n #> m = repl n m
 
 infixl 1 >>~
 (>>~) :: Monoid b => (a -> b) -> [a] -> b
@@ -21,8 +21,14 @@ infixl 1 >>~
 (~=~) :: (Dur, Music Dur b) -> (Dur, Music Dur b) -> Music Dur b
 (~=~) = poly
 
+infixl 2 ~=
 (~=) :: Music Dur b -> Music Dur b -> Music Dur b
 (~=) = fitL
 
+infixr 2 =~
 (=~) :: Music Dur b -> Music Dur b -> Music Dur b
 (=~) = fitR
+
+infixr 2 ~~
+(~~) :: Dur -> Music Dur b -> Music Dur b
+(~~) = withDuration

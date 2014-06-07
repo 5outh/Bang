@@ -60,8 +60,14 @@ withDuration :: Dur -> Music Dur b -> Music Dur b
 withDuration d m = first (*(d/d')) m
   where d' = duration m
 
+repl :: Num a => Int -> Music a b -> Music a b
+repl n = mconcat . replicate n
+
+rep :: Num a => Music a b -> Music a b
+rep = mconcat . repeat
+
 fitL :: Music Dur b -> Music Dur b -> Music Dur b
-fitL a = cappend a . withDuration (duration a) 
+fitL a = cappend a . withDuration (duration a)
 
 fitR :: Music Dur b -> Music Dur b -> Music Dur b
 fitR = flip fitL

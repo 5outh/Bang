@@ -35,10 +35,11 @@ data Options = Options {
 defaultOptions :: Options
 defaultOptions = Options 120 1
 
--- |Play a `Composition` over the first system `Destination` for MIDI events
+-- | Play a `Composition` over the first system `Destination` for MIDI events
 bang :: Music Dur PercussionSound -> IO ()
 bang = bangWith defaultOptions
 
+-- | Bang with repetition
 bangR :: Music Dur PercussionSound -> IO ()
 bangR = bang . mconcat . repeat
 

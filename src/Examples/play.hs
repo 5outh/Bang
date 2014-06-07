@@ -20,9 +20,16 @@ complex = bang $
 
 doubleBass = bang $ double $ triplets ( hc >< (3 #> bassDrum2) )
 
-poly = bang $ (3, 3 #> bd) ~=~ (4, 4 #> sn)
+polyrhythm = bang $ (3, 3 #> bd) ~=~ (4, 4 #> sn)
 
-quints = bangR $ (1/4) !> quintuplets $ (hc >< bd) <> (4 #> bd)
+polyFast = bang $ (3 #> bd) ~= (4 #> sn)
+
+polySlow = bang $ (3 #> bd) =~ (4 #> sn)
+
+crazyPoly = bang $ 
+  ( 7 #> bd ) ~= ( 5 #> hc <> sn )
+
+quints = bangR $ tempo 4 $ quintuplets $ (hc >< bd) <> (4 #> bd)
 
 amanda = mconcat
   [ 2 #> lowAgogo
