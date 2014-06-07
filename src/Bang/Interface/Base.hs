@@ -23,17 +23,17 @@ bpm :: Integer -> Music a b -> Music a b
 bpm n = Modify (BPM n)
 
 tempo :: Rational -> Music a b -> Music a b
-tempo n = Modify (Tempo n)
+tempo n = Modify (Tempo (1/n))
 
 m4 a b c d = mconcat [a, b, c, d]
 
-quad      = tempo (1/4)
-double    = tempo (1/2)
+quad      = tempo 4
+double    = tempo 2
 quarter   = tempo 1 -- default
-half      = tempo 2
-whole     = tempo 4
+half      = tempo (1/2)
+whole     = tempo (1/4)
 
-tuplets n   = tempo (4/n)
+tuplets n   = tempo (n/4)
 triplets    = tuplets 3
 quintuplets = tuplets 5
 

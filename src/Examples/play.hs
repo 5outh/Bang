@@ -2,13 +2,13 @@ import Bang
 import Data.Monoid
 import Data.Ratio
 
-simple = bang $ 120 @> ( (4 #> hc) >< (bd <> qr <> sn <> qr) )
+simple = bang $ double $ (4 #> hc) >< (bd <> qr <> sn <> qr)
 
-complex = bang $ 240 %>
-  mirror $ 
+complex = bang $
+  mirror $ double $ 
   mconcat [
     bd >< cc
-  , half $ mconcat [
+  , cross $ half $ mconcat [
     sn
     , quad ( 4 #> (hc >< bd) )
     , sn >< ho
@@ -18,20 +18,20 @@ complex = bang $ 240 %>
   , bd >< crashCymbal1
   ]
 
-doubleBass = bang $ 240 @> double $ triplets ( hc >< (3 #> bassDrum2) )
+doubleBass = bang $ double $ triplets ( hc >< (3 #> bassDrum2) )
 
-poly = bang $ 120 %> (triplets $ 3 #> bd) >< (4 #> sn)
+poly = bang $ (3, 3 #> bd) ~=~ (4, 4 #> sn)
 
-quints = bang $ 480 @> quintuplets $ (hc >< bd) <> (4 #> bd)
+quints = bangR $ (1/4) !> quintuplets $ (hc >< bd) <> (4 #> bd)
 
-amanda = 240 @> mconcat
+amanda = mconcat
   [ 2 #> lowAgogo
   , double $ 4 #> (bd >< hc)
   ]
 
-toxicity = 
+toxicity =
   let sh = sn >< hc 
-  in bang $ 240 @>
+  in bangR $ double $ 
      bd
   <> (double $ mconcat [
       mconcat [sh, bd, qr, bd, sh, qr, bd, qr, sh, qr]
