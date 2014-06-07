@@ -54,7 +54,7 @@ mconcatMap :: Monoid b => (a -> b) -> [a] -> b
 mconcatMap f = mconcat . map f
 
 poly :: (Dur, Music Dur b) -> (Dur, Music Dur b) -> Music Dur b
-poly (x, m) (y, n) = (tempo (4/x) m) :=: (tempo (4/y) n)
+poly (x, m) (y, n) = (tempo (x/4) m) :=: (tempo (y/4) n)
 
 withDuration :: Dur -> Music Dur b -> Music Dur b
 withDuration d m = first (*(d/d')) m
@@ -71,3 +71,9 @@ normalize d = mconcatMap (withDuration d)
 
 normalizeC :: Dur -> [Music Dur b] -> Music Dur b
 normalizeC d = cconcat . map (withDuration d)
+
+normalize1 :: [Music Dur b] -> Music Dur b
+normalize1 (x:xs)= mconcatMap (withDuration (duration x)) (x:xs)
+
+normalizeC1 :: [Music Dur b] -> Music Dur b
+normalizeC1 (x:xs) = cconcat $ map (withDuration (duration x)) (x:xs)

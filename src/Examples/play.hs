@@ -2,10 +2,10 @@ import Bang
 import Data.Monoid
 import Data.Ratio
 
-simple = bang $ (4 #> hc) >< (bd <> qr <> sn <> qr)
+simple = bang $ double $ (4 #> hc) >< (bd <> qr <> sn <> qr)
 
 complex = bang $
-  mirror $ 
+  mirror $ double $ 
   mconcat [
     bd >< cc
   , cross $ half $ mconcat [
@@ -31,7 +31,7 @@ amanda = mconcat
 
 toxicity =
   let sh = sn >< hc 
-  in 240 @> 
+  in bangR $ double $ 
      bd
   <> (double $ mconcat [
       mconcat [sh, bd, qr, bd, sh, qr, bd, qr, sh, qr]

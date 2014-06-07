@@ -4,8 +4,6 @@ module Bang(
 , runComposition
 , bang
 , bangR
-, (%>)
-, (@>)
 , module Bang.Music.Operators
 , module Bang.Music.Class
 , module Bang.Music.Transform
@@ -83,11 +81,3 @@ runComposition = do
         lift $ send conn ev
       lift $ threadDelay 1000
       runComposition
-
-infixr 0 %>
-(%>) :: Integer -> Music Dur PercussionSound -> IO ()
-n %> m = bangWith defaultOptions{ o_bpm = n } m
-
-infixr 0 @>
-(@>) :: Integer -> Music Dur PercussionSound -> IO ()
-n @> m = bangWith defaultOptions{ o_bpm = n } (mconcat $ repeat m)
