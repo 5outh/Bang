@@ -20,3 +20,9 @@ infixl 1 >>~
 
 (~=~) :: (Dur, Music Dur b) -> (Dur, Music Dur b) -> Music Dur b
 (~=~) = poly
+
+(~=) :: Music Dur b -> Music Dur b -> Music Dur b
+(~=) = fitL
+
+(=~) :: Music Dur b -> Music Dur b -> Music Dur b
+(=~) = fitR

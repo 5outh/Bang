@@ -3,6 +3,7 @@ module Bang.Music.Transform where
 import Bang.Music.Class
 import Bang.Interface.Base
 import Data.Monoid
+import Data.Bifunctor
 
 reverseMusic :: Music Dur b -> Music Dur b
 reverseMusic p@(Prim _) = p
@@ -54,3 +55,13 @@ mconcatMap f = mconcat . map f
 
 poly :: (Dur, Music Dur b) -> (Dur, Music Dur b) -> Music Dur b
 poly (x, m) (y, n) = (tempo (4/x) m) :=: (tempo (4/y) n)
+
+withDuration :: Dur -> Music Dur b -> Music Dur b
+withDuration d m = first (*(d/d')) m
+  where d' = duration m
+
+fitL :: Music Dur b -> Music Dur b -> Music Dur b
+fitL a = cappend a . withDuration (duration a) 
+
+fitR :: Music Dur b -> Music Dur b -> Music Dur b
+fitR = flip fitL
