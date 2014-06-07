@@ -48,3 +48,9 @@ hushFor d m = rest d <> dropDur d m
 
 hushFrom :: Dur -> Music Dur b -> Music Dur b
 hushFrom d m = takeDur d m <> rest (max (duration m - d) 0)
+
+mconcatMap :: Monoid b => (a -> b) -> [a] -> b
+mconcatMap f = mconcat . map f
+
+poly :: (Dur, Music Dur b) -> (Dur, Music Dur b) -> Music Dur b
+poly (x, m) (y, n) = (tempo (4/x) m) :=: (tempo (4/y) n)
