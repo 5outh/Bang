@@ -65,3 +65,9 @@ fitL a = cappend a . withDuration (duration a)
 
 fitR :: Music Dur b -> Music Dur b -> Music Dur b
 fitR = flip fitL
+
+normalize :: Dur -> [Music Dur b] -> Music Dur b
+normalize d = mconcatMap (withDuration d)
+
+normalizeC :: Dur -> [Music Dur b] -> Music Dur b
+normalizeC d = cconcat . map (withDuration d)
