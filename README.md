@@ -16,8 +16,8 @@ toxicityIntro =
       cd = bd >< cc -- bass and crash cymbal combo
   in bang $ 
      double $ -- play at double tempo
-        bd
-     <> ( double $ 
+        bd <>
+        ( double $ 
           mconcat [ -- concatenate into a single sequential composition
             mconcat [sh, bd, qr, bd, sh, qr, bd, qr, sh, qr]
           , mconcat [ 
