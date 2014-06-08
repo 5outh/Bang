@@ -9,16 +9,16 @@ interpreted by the Haskell programming language.
 Example:
 
 ```haskell
--- | Intro to 'Toxicity' by System of a Down.
+-- | The first few measures of 'Toxicity' by System of a Down.
 toxicityIntro =
   let sh = sn >< hc -- snare and closed hi-hat combo
       bc = bd >< hc -- bass and closed hi-hat combo
       cd = bd >< cc -- bass and crash cymbal combo
   in bang $ 
-     double $ 
+     double $ -- play at double tempo
         bd
      <> ( double $ 
-          mconcat [
+          mconcat [ -- concatenate into a single sequential composition
             mconcat [sh, bd, qr, bd, sh, qr, bd, qr, sh, qr]
           , mconcat [ 
               (2 #>) >>~ [sn, t1, t2] -- play each element of the list twice
