@@ -1,16 +1,16 @@
 
 module Bang(
-  play
-, runComposition
-, bang
+  bang
 , bangR
+, Options(..)
+, defaultOptions
 , module Bang.Music.Operators
 , module Bang.Music.Class
 , module Bang.Music.Transform
 , module Bang.Interface.Base
 , module Bang.Interface.Drum
 , module Bang.Interpreter
-)where
+) where
 
 import Control.Monad
 import Control.Monad.Trans
@@ -25,7 +25,6 @@ import Bang.Music.Transform
 import Bang.Interpreter
 import Bang.Interface.Base
 import Bang.Interface.Drum
-
 
 data Options = Options {
   o_bpm :: Integer,

@@ -11,8 +11,11 @@ import Data.Bifoldable
 
 type Dur = Rational
 
+-- |Primitive objects in music are simply notes with duration and type, or rests with only duration.
 data Primitive d a = 
+    -- | A `Note` with duration `dur` and type `ntype`
     Note {dur :: d, ntype :: a}
+    -- | A `Rest` with duration `dur`
   | Rest {dur :: d}
     deriving (Show, Eq)
 
@@ -20,11 +23,26 @@ instance Functor (Primitive dur) where
   fmap f (Note d a) = Note d (f a)
   fmap f (Rest d)   = Rest d
 
+-- | A musical composition with duration type dur (typically `Dur`) and instrument type `a` (typically a `PercussionSound`)
 data Music dur a = 
+    -- | A Primitive musical object.
     Prim (Primitive dur a)
+    -- | Sequential composition of music
   | Music dur a :+: Music dur a
+    -- | Parallel composition of music
   | Music dur a :=: Music dur a
+    -- | Modifier (typically 'BPM' or 'Tempo' change)
   | Modify Control (Music dur a)
+    deriving (Show, Eq)
+
+-- | Simple data type representing different control structures for compositions.
+data Control = 
+    BPM Integer               
+    -- ^ Set the beats per minute (WARNING: Only set this once, or BPM will multiply!)
+  | Tempo Rational            
+    -- ^ Set the speed for a section of music (default 1)
+  | Instrument InstrumentName 
+    -- ^ Change the instrument (currently unused)
     deriving (Show, Eq)
 
 {-
@@ -69,15 +87,13 @@ instance Bifoldable Music where
   bifoldMap f g (a :=: b) = bifoldMap f g a `mappend` bifoldMap f g b
   bifoldMap f g (Modify c a) = bifoldMap f g a
 
-data Control = 
-    BPM Integer               -- set the beats per minute
-  | Tempo Rational            -- set the speed for a section of music (default 1)
-  | Instrument InstrumentName -- Change the instrument (currently unused)
-    deriving (Show, Eq)
-
+-- | Simple data type representing the types of instruments Bang supports.
+-- 
+-- Currently, the only value is 'DrumSet'.
 data InstrumentName = DrumSet
   deriving (Show, Eq)
 
+-- | Get the duration of a full composition
 duration :: (Fractional a, Ord a) => Music a b -> a
 duration (a :+: b) = duration a + duration b
 duration (a :=: b) = max (duration a) (duration b)
@@ -86,18 +102,20 @@ duration (Modify _ m) = duration m
 duration (Prim (Note d a)) = d
 duration (Prim (Rest d)) = d
 
-foldDur :: (Num c) => (a -> c -> c) -> c -> Music a b -> c
-foldDur f = bifoldr f (const (const 0))
-
--- a "second monoid instance" without a newtype wrapper for `Num dur => Music dur`.
--- `c` for `concurrent`.
+-- | Parallel 'mappend'
+--
+-- Part of a second 'Monoid' "instance" for 'Music'
 cappend :: Music dur a -> Music dur a -> Music dur a
 cappend = (:=:)
+
+-- | Parallel 'mempty'
+--
+-- Part of a second 'Monoid' "instance" for 'Music'
 cempty :: Num dur => Music dur a
 cempty  = Prim (Rest 0)
+
+-- | Parallel 'mconcat'
+-- 
+-- Part of a second 'Monoid' "instance" for 'Music'
 cconcat :: Num dur => [Music dur a] -> Music dur a
 cconcat = foldr cappend cempty
--- parallel of `<>`
-infixr 6 ><
-(><) :: Music dur a -> Music dur a -> Music dur a
-(><) = cappend

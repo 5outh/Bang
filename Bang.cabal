@@ -18,18 +18,21 @@ cabal-version:       >=1.10
 
 library
   exposed-modules:     Bang, 
-                       Bang.Music, 
                        Bang.Interface.Base,
                        Bang.Interface.Drum,
                        Bang.Music.Class, 
-                       Bang.Music.Drum
+                       Bang.Music.Operators, 
+                       Bang.Music.Transform
+
+  other-modules:       Bang.Interpreter
+
   -- other-modules:       
   other-extensions:    DeriveFunctor, NoMonomorphismRestriction
   build-depends:       base >=4.6 && <5, 
-                       free >=4.6 && <5, 
                        mtl >=2.1 && <3, 
                        transformers >=0.3 && <0.4, 
-                       hmidi >=0.2 && <0.3
+                       hmidi >=0.2 && <0.3,
+                       bifunctors >= 4 && <5
 
   hs-source-dirs:      src
   default-language:    Haskell2010

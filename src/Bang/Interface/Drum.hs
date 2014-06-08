@@ -55,7 +55,7 @@ data PercussionSound =
     deriving (Show,Eq,Ord,Enum)
 
 drum :: PercussionSound -> Dur -> Music Dur PercussionSound
-drum ps d = Prim ( (Note d ps ) )
+drum ps d = Prim (Note d ps)
 
 qd :: PercussionSound -> Music Dur PercussionSound
 qd ps = drum ps (1/4)
