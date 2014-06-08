@@ -16,20 +16,20 @@ toxicityIntro =
       cd = bd >< cc -- bass and crash cymbal combo
   in bang $ 
      double $ -- play at double tempo
-        bd <>
-        ( double $ 
-          mconcat [ -- concatenate into a single sequential composition
-            mconcat [sh, bd, qr, bd, sh, qr, bd, qr, sh, qr]
-          , mconcat [ 
-              (2 #>) >>~ [sn, t1, t2] -- play each element of the list twice
-            , double $ 4 #> sn
-            , (2 #>) >>~ [sn, t1, t2] 
-            , m4 cd qr hc sn -- groups of measures with 4 beats  
-            , m4 hc bd sh qr
-            , m4 hc sn bc qr
-            , m4 bc qr hc sh
-            , m4 hc bd sh qr
-            , m4 bd qr sh qr 
-            ] 
-          ] )
+       bd <>
+       ( double $ 
+         mconcat [ -- concatenate into a single sequential composition
+           mconcat [sh, bd, qr, bd, sh, qr, bd, qr, sh, qr]
+         , mconcat [ 
+             (2 #>) >>~ [sn, t1, t2] -- play each element of the list twice
+           , double $ 4 #> sn
+           , (2 #>) >>~ [sn, t1, t2] 
+           , m4 cd qr hc sn -- groups of measures with 4 beats  
+           , m4 hc bd sh qr
+           , m4 hc sn bc qr
+           , m4 bc qr hc sh
+           , m4 hc bd sh qr
+           , m4 bd qr sh qr 
+           ] 
+         ] )
 ```
