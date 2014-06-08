@@ -1,5 +1,9 @@
-module Bang.Music(module X) where
+module Bang.Music(
+  module Bang.Music.Class
+, module Bang.Music.Transform
+, module Bang.Music.Operators
+) where
 
-import Bang.Music.Class as X
-import Bang.Music.Transform as X
-import Bang.Music.Operators as X
+import Bang.Music.Class
+import Bang.Music.Transform
+import Bang.Music.Operators

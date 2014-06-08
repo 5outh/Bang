@@ -1,4 +1,15 @@
+{-|
+Module      : Bang
+Description : A Domain Specific Language for generating drum compositions
+Copyright   : (c) Benjamin Kovach, 2014
+License     : MIT
+Maintainer  : bkovach13@gmail.com
+Stability   : experimental
+Portability : Mac OSX
 
+The Bang module exports the main functions to actually play a constructed composition. You can use either 'bang' to
+play a composition a single time, or 'bangR' to continuously repeat a composition /ad infinitum/.
+-}
 module Bang(
   bang
 , bangR
@@ -6,11 +17,8 @@ module Bang(
 , bangRWith
 , Options(..)
 , defaultOptions
-, module Bang.Music.Operators
-, module Bang.Music.Class
-, module Bang.Music.Transform
-, module Bang.Interface.Base
-, module Bang.Interface.Drum
+, module Bang.Music
+, module Bang.Interface
 ) where
 
 import Control.Monad
@@ -20,12 +28,9 @@ import Control.Concurrent
 import Data.Monoid
 import System.MIDI
 
-import Bang.Music.Operators
-import Bang.Music.Class
-import Bang.Music.Transform
+import Bang.Music
+import Bang.Interface
 import Bang.Interpreter
-import Bang.Interface.Base
-import Bang.Interface.Drum
 
 data Options = Options {
   o_bpm :: Integer,
@@ -95,7 +100,6 @@ runComposition = do
       let x@(MidiEvent s ev) = drumToMidiEvent e
       when (s < t) $ do
         put (conn, xs)
-        lift $ print x
         lift $ send conn ev
       lift $ threadDelay 1000
       runComposition

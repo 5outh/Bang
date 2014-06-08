@@ -1,3 +1,14 @@
+{-|
+Module      : Bang.Music.Class
+Description : Data declarations for Bang
+Copyright   : (c) Benjamin Kovach, 2014
+License     : MIT
+Maintainer  : bkovach13@gmail.com
+Stability   : experimental
+Portability : Mac OSX
+
+Implements the core data structures for use in the Bang library.
+-}
 {-# LANGUAGE NoMonomorphismRestriction #-}
 module Bang.Music.Class where
 

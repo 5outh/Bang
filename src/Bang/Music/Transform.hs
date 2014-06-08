@@ -1,3 +1,14 @@
+{-|
+Module      : Bang.Music.Transform
+Description : General transformations on compositions 
+Copyright   : (c) Benjamin Kovach, 2014
+License     : MIT
+Maintainer  : bkovach13@gmail.com
+Stability   : experimental
+Portability : Mac OSX
+
+This module exports a number of functions to manipulate compositions in various ways.
+-}
 module Bang.Music.Transform where
 
 import Bang.Music.Class

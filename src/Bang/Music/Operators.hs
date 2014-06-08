@@ -1,3 +1,14 @@
+{-|
+Module      : Bang.Music.Operators
+Description : The DSL part of the Bang library
+Copyright   : (c) Benjamin Kovach, 2014
+License     : MIT
+Maintainer  : bkovach13@gmail.com
+Stability   : experimental
+Portability : Mac OSX
+
+Defines a number of operators to effectively piece together Bang compositions.
+-}
 module Bang.Music.Operators where
 
 import Bang.Music.Class
@@ -15,7 +26,9 @@ infixr 6 ><
 infixr 0 !>
 -- |Set the `Tempo` of a composition (default 1)
 -- 
--- 
+--  Example (play 4 bass drum hits at double speed):
+--
+-- > 2 !> (4 #> bd)
 (!>) :: Rational -> Music a b -> Music a b
 (!>) = tempo
 

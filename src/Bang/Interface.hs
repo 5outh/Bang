@@ -1,4 +1,7 @@
-module Bang.Interface (module X) where
+module Bang.Interface (
+  module Bang.Interface.Base
+, module Bang.Interface.Drum
+) where
 
-import Bang.Interface.Base as X
-import Bang.Interface.Drum as X
+import Bang.Interface.Base
+import Bang.Interface.Drum

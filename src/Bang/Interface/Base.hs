@@ -1,3 +1,14 @@
+{-|
+Module      : Bang.Interface.Base
+Description : An interface to the basic, general musical operations in Bang
+Copyright   : (c) Benjamin Kovach, 2014
+License     : MIT
+Maintainer  : bkovach13@gmail.com
+Stability   : experimental
+Portability : Mac OSX
+
+This module exports a number of utilities for constructing primitive notes, rests, and tempo.
+-}
 module Bang.Interface.Base where
 
 import Bang.Music.Class
