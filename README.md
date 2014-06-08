@@ -6,6 +6,27 @@ An <b>E</b>mbedded <b>D</b>omain <b>S</b>pecific <b>L</b>anguage for writing dru
 Bang interfaces with your system MIDI device in order to play drum compositions, directly written in and 
 interpreted by the Haskell programming language.
 
+Currently, the only OS Bang has been tested on is Mac OSX Mavericks, but it is entirely possible that it will work on other operating systems. Please let me know if you manage to get it building and working elsewhere; I'd love to know!
+
+### Installing
+
+Installation of the library is simple.
+
+```
+> cabal update
+> cabal install Bang
+```
+
+On OSX, some additional setup is required to output MIDI sounds. First, you'll need to download and install [SimpleSynth](http://notahat.com/simplesynth/). Next, you'll need to set up a MIDI IAC driver. Open Audio MIDI Setup (in Applications > Utilities) and press ⌘2 (or go Window -> Show MIDI Window). You should see a slightly greyed out IAC Driver icon. Double click it, then check the box labeled "Device is online." Launch SimpleSynth and set the MIDI Source to "IAC Driver Bus 1" (or whatever you named your IAC driver) using the drop-down box at the top of the window. Audio from Bang should now feed into and play through SimpleSynth.
+
+### Getting Started
+
+TODO
+
+### Implementation Details
+
+TODO
+
 Example:
 
 ```haskell
