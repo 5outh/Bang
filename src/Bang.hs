@@ -2,6 +2,8 @@
 module Bang(
   bang
 , bangR
+, bangWith
+, bangRWith
 , Options(..)
 , defaultOptions
 , module Bang.Music.Operators
@@ -9,7 +11,6 @@ module Bang(
 , module Bang.Music.Transform
 , module Bang.Interface.Base
 , module Bang.Interface.Drum
-, module Bang.Interpreter
 ) where
 
 import Control.Monad
@@ -28,20 +29,36 @@ import Bang.Interface.Drum
 
 data Options = Options {
   o_bpm :: Integer,
+  -- ^ BPM of the composition to play
   o_tempo :: Dur
-} deriving (Show, Eq)
+  -- ^ Initial 'Tempo' of the composition to play
+  } deriving (Show, Eq)
 
+-- | Default options to 'bang' with.
+--
+-- > defaultOptions = Options{ o_bpm = 120, o_tempo = 1 }
 defaultOptions :: Options
-defaultOptions = Options 120 1
+defaultOptions = Options{ o_bpm = 120, o_tempo = 1 }
 
--- | Play a `Composition` over the first system `Destination` for MIDI events
+-- | Play a composition over the first system `Destination` for MIDI events.
+--
+-- > bang = bangWith defaultOptions
 bang :: Music Dur PercussionSound -> IO ()
 bang = bangWith defaultOptions
 
--- | Bang with repetition
+-- | 'bang' a composition repeatedly.
+--
+-- > bangR = bang . mconcat . repeat
 bangR :: Music Dur PercussionSound -> IO ()
-bangR = bang . mconcat . repeat
+bangR = bangRWith defaultOptions
 
+-- | 'bangR' with specified 'Options'.
+--
+-- > bangRWith opts = bangWith opts . mconcat . repeat
+bangRWith :: Options -> Music Dur PercussionSound -> IO ()
+bangRWith opts = bangWith opts . mconcat . repeat
+
+-- | 'bang' with specified 'Options'.
 bangWith :: Options -> Music Dur PercussionSound -> IO ()
 bangWith opts song = do
   dstlist <- enumerateDestinations
@@ -53,20 +70,21 @@ bangWith opts song = do
       conn    <- openDestination dst
       playWith opts conn song
 
+-- | 'play' with specified 'Options'
 playWith :: Options -> Connection -> Music Dur PercussionSound -> IO ()
 playWith (Options oBpm oTempo) conn song = do
   start conn
   evalStateT runComposition (conn, interpret (bpm oBpm $ tempo oTempo song))
   close conn
 
--- |`play` a `Composition` over a given `Connection`
+-- | 'play' a composition over a given 'Connection'
 play :: Connection -> Music Dur PercussionSound -> IO ()
 play conn song = do
   start conn
   evalStateT runComposition (conn, interpret song)
   close conn
 
--- |Run a `Composition` by repeatedly updating the `Connection` and sending events as they come.
+-- | Run a composition by repeatedly updating the `Connection` and sending events as they come.
 runComposition :: StateT (Connection, [Primitive Dur PercussionSound]) IO ()
 runComposition = do
   (conn, evs) <- get
