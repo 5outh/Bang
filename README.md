@@ -26,6 +26,7 @@ Bang exports two main entry points for playing compositions, `bang` to play comp
 To play a single bass drum hit:
 
 ```haskell
+> :m + Bang
 > bang bd
 ```
 
@@ -36,7 +37,15 @@ To play two compositions sequentially, use `<>` (from `Data.Monoid`):
 > bang $ bd <> sn -- bass, then snare.
 ```
 
-To play two compositions in parallel, use '><':
+To add rests into compositions, use `rest`:
+
+```haskell
+> bang $ bd <> rest (1/4) <> bd -- bass, quarter rest, bass.
+```
+
+Many special cases of rests reside in [Bang.Interface.Base](https://github.com/5outh/Bang/blob/master/src/Bang/Interface/Base.hs). These include `qr` (quarter rest), `hr` (half), `er` (eighth), `wr` (whole) and more.
+
+To play two compositions in parallel, use `><`:
 
 ```haskell
 > bang $ bd >< sn -- bass and snare at the same time.
@@ -53,6 +62,8 @@ To play a composition multiple times in sequence, use `#>`:
 ```haskell
 > bang $ (1/2) !> (bd <> sn) -- play at half speed
 ```
+
+A number of special cases of tempo-setting functions such as `double`, `quad`, `half`, and `triplets` reside in [Bang.Interface.Base](https://github.com/5outh/Bang/blob/master/src/Bang/Interface/Base.hs).
 
 By default, each primitive note in `Bang` has duration `1/4`. To set the duration for a composition, use `~~`:
 
@@ -160,12 +171,7 @@ All of the operators reside in [Bang.Music.Operators](https://github.com/5outh/B
 
 All of the primitive sounds (such as `bd`, `sn` and `hc` are implemented in [Bang.Interface.Drum](https://github.com/5outh/Bang/blob/master/src/Bang/Interface/Drum.hs). This includes all of the MIDI percussion sounds, with the more common ones having shortform and longform names. All of these can be used in Bang compositions.
 
-
-### Implementation Details and Acknowlegements
-
-TODO
-
-Example:
+Extended example:
 
 ```haskell
 -- | The first few measures of 'Toxicity' by System of a Down.
@@ -192,3 +198,7 @@ toxicityIntro =
            ] 
          ] )
 ```
+
+### Acknowlegements
+
+A lot of inspiration and guidance on the implementation of Bang comes from the [Haskell School of Music](http://haskell.cs.yale.edu/euterpea/haskell-school-of-music/) and Paul Hudak's [very interesting paper](http://cpsc.yale.edu/sites/default/files/files/tr1259.pdf). [Tidal by Alex McLean](http://yaxu.org/tidal/) is also notable as inspiration. The goal of Bang is to produce a small subset of these things that works well for something very specific: composing drum-only beats.
