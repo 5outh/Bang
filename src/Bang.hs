@@ -27,6 +27,7 @@ import Control.Monad.Trans.State
 import Control.Concurrent
 import Data.Monoid
 import System.MIDI
+import System.Info
 
 import Bang.Music
 import Bang.Interface
@@ -78,8 +79,12 @@ bangWith opts song = do
 -- | 'play' with specified 'Options'
 playWith :: Options -> Connection -> Music Dur PercussionSound -> IO ()
 playWith (Options oBpm oTempo) conn song = do
+  -- Add a dummy note at the end 'cause Windows doesn't play the last one for some reason.
+  -- This is stupid, but windows is generally unsupported anyway.
+  let song' | os == "mingw32" || os == "mingw" = song <> bd 
+            | otherwise = song
   start conn
-  evalStateT runComposition (conn, interpret (bpm oBpm $ tempo oTempo song))
+  evalStateT runComposition (conn, interpret (bpm oBpm $ tempo oTempo song'))
   close conn
 
 -- | 'play' a composition over a given 'Connection'
