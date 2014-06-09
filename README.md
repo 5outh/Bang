@@ -21,6 +21,8 @@ On OSX, some additional setup is required to output MIDI sounds. First, you'll n
 
 ### Getting Started
 
+Bang exports two main entry points for playing compositions, `bang` to play compositions once and stop, and `bangR`, to play compositions on repeat. In all of the following examples, `bang` can be replaced by `bangR`.
+
 To play a single bass drum hit:
 
 ```haskell
@@ -30,7 +32,7 @@ To play a single bass drum hit:
 To play two compositions sequentially, use `<>` (from `Data.Monoid`):
 
 ```haskell
-> :m +  Data.Monoid
+> :m + Data.Monoid
 > bang $ bd <> sn -- bass, then snare.
 ```
 
@@ -109,7 +111,49 @@ We can map an operator over a list of compositions using `>>~`:
 
 ```haskell
 -- Play each note in the list twice, sequentially.
-> (2 #>) >>~ [sn, bd, hc]
+> bang $ (2 #>) >>~ [sn, bd, hc]
+```
+
+#### Other transformations
+
+`reverseMusic` does just what you'd expect:
+
+```haskell
+> bang $ reverseMusic $ bd <> sn -- snare, then bass.
+```
+
+`mirror` plays a composition forward, then backward. `mirrorR` plays it backwards, then forwards:
+
+```haskell
+> bang $ mirror  $ bd <> sn -- bd, sn, sn, bd
+> bang $ mirrorR $ bd <> sn -- sn, bd, bd, sn
+```
+
+`cross` plays a composition both forward and backward at the same time:
+
+```haskell
+> bang $ cross $ bd <> sn -- (bd & sn), (bd & sn)
+```
+
+`rep` repeats a composition ad infinitum:
+
+```haskell
+> bang $ rep bd -- bd, bd, bd, bd ...
+```
+
+`m4` is a convenience constructor for 4-element compositions (useful for piecing together 4-element measures):
+
+```haskell
+> bang $ m4 bd hc bd sn -- bd, hc, bd, sn
+```
+
+Compositions form two monoids: one under `<>` (sequential composition) and one under `><` (parallel composition). To avoid wrapping everything in newtypes, the `<>` monoid is the 'real' one, and the `><` one uses similar names to the "real" monoid names.
+
+Of particular note are the "concat" functions. `mconcat` plays a list of compositions in sequence, while `cconcat` plays a list of compositions in parallel:
+
+```haskell
+> bang $ mconcat [bd, sn, hc, sn] -- bd, sn, hc, sn in sequence
+> bang $ cconcat [bd, sn, hc]     -- bd, sn, hc all at once 
 ```
 
 All of the operators reside in [Bang.Music.Operators](https://github.com/5outh/Bang/blob/master/src/Bang/Music/Operators.hs), with most underlying implementations (and plain text functions) in [Bang.Music.Transform](https://github.com/5outh/Bang/blob/master/src/Bang/Music/Transform.hs).
@@ -117,7 +161,7 @@ All of the operators reside in [Bang.Music.Operators](https://github.com/5outh/B
 All of the primitive sounds (such as `bd`, `sn` and `hc` are implemented in [Bang.Interface.Drum](https://github.com/5outh/Bang/blob/master/src/Bang/Interface/Drum.hs). This includes all of the MIDI percussion sounds, with the more common ones having shortform and longform names. All of these can be used in Bang compositions.
 
 
-### Implementation Details
+### Implementation Details and Acknowlegements
 
 TODO
 
