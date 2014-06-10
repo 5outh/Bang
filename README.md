@@ -209,6 +209,8 @@ All of the operators reside in [Bang.Music.Operators](https://github.com/5outh/B
 
 All of the primitive sounds (such as `bd`, `sn` and `hc` are implemented in [Bang.Interface.Drum](https://github.com/5outh/Bang/blob/master/src/Bang/Interface/Drum.hs). This includes all of the MIDI percussion sounds, with the more common ones having shortform and longform names. All of these can be used in Bang compositions.
 
+Finally, the full documentation is available [on Hackage](https://hackage.haskell.org/package/Bang).
+
 ##### An Extended Example
 
 ```haskell
