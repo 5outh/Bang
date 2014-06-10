@@ -30,10 +30,70 @@ bpm n = Modify (BPM n)
 tempo :: Rational -> Music a b -> Music a b
 tempo n = Modify (Tempo (1/n))
 
--- | Convenience function for concatenating four compositions together
--- sequentially. Most general type signature \'cause why not?
+-- |Sequence `k` compositions together without the need for lists. 
+-- `m` corresponds to `m` in `mappend`, `mconcat`, etc.
+m2 :: Monoid a => a -> a -> a
+m2 a b = a <> b
+m3 :: Monoid a => a -> a -> a -> a
+m3 a b c = mconcat [a, b, c]
 m4 :: Monoid a => a -> a -> a -> a -> a
 m4 a b c d = mconcat [a, b, c, d]
+m5 :: Monoid a => a -> a -> a -> a -> a -> a
+m5 a b c d e = mconcat [a, b, c, d, e]
+m6 :: Monoid a => a -> a -> a -> a -> a -> a -> a
+m6 a b c d e f =  mconcat [a, b, c, d, e, f]
+m7 :: Monoid a => a -> a -> a -> a -> a -> a -> a -> a
+m7 a b c d e f g = mconcat [a, b, c, d, e, f, g]
+m8 :: Monoid a => a -> a -> a -> a -> a -> a -> a -> a -> a
+m8 a b c d e f g h = mconcat [a, b, c, d, e, f, g, h]
+m9 :: Monoid a => a -> a -> a -> a -> a -> a -> a -> a -> a -> a
+m9 a b c d e f g h i = mconcat [a, b, c, d, e, f, g, h, i]
+m10 :: Monoid a => a -> a -> a -> a -> a -> a -> a -> a -> a -> a -> a
+m10 a b c d e f g h i j = mconcat [a, b, c, d, e, f, g, h, i, j]
+m11 :: Monoid a => a -> a -> a -> a -> a -> a -> a -> a -> a -> a -> a -> a
+m11 a b c d e f g h i j k = mconcat [a, b, c, d, e, f, g, h, i, j, k]
+m12 :: Monoid a => a -> a -> a -> a -> a -> a -> a -> a -> a -> a -> a -> a -> a
+m12 a b c d e f g h i j k l = mconcat [a, b, c, d, e, f, g, h, i, j, k, l]
+
+-- |Play `k` compositions concurrently without the need for lists.
+-- `c` corresponds to `c` in `cappend`, `cconcat`, etc.
+c2 :: Num d => Music d a -> Music d a -> Music d a
+c2 a b = a <> b
+c3 :: Num d => Music d a -> Music d a -> Music d a -> Music d a
+c3 a b c = cconcat [a, b, c]
+c4 :: Num d => Music d a -> Music d a -> Music d a -> Music d a 
+            -> Music d a
+c4 a b c d = cconcat [a, b, c, d]
+c5 :: Num d => Music d a -> Music d a -> Music d a -> Music d a 
+              -> Music d a -> Music d a
+c5 a b c d e = cconcat [a, b, c, d, e]
+c6 :: Num d => Music d a -> Music d a -> Music d a -> Music d a 
+            -> Music d a -> Music d a -> Music d a
+c6 a b c d e f =  cconcat [a, b, c, d, e, f]
+c7 :: Num d => Music d a -> Music d a -> Music d a -> Music d a 
+            -> Music d a -> Music d a -> Music d a -> Music d a
+c7 a b c d e f g = cconcat [a, b, c, d, e, f, g]
+c8 :: Num d => Music d a -> Music d a -> Music d a -> Music d a 
+            -> Music d a -> Music d a -> Music d a -> Music d a 
+            -> Music d a
+c8 a b c d e f g h = cconcat [a, b, c, d, e, f, g, h]
+c9 :: Num d => Music d a -> Music d a -> Music d a -> Music d a 
+            -> Music d a -> Music d a -> Music d a -> Music d a 
+            -> Music d a -> Music d a
+c9 a b c d e f g h i = cconcat [a, b, c, d, e, f, g, h, i]
+c10 :: Num d => Music d a -> Music d a -> Music d a -> Music d a 
+             -> Music d a -> Music d a -> Music d a -> Music d a 
+             -> Music d a -> Music d a -> Music d a
+c10 a b c d e f g h i j = cconcat [a, b, c, d, e, f, g, h, i, j]
+c11 :: Num d => Music d a -> Music d a -> Music d a -> Music d a 
+             -> Music d a -> Music d a -> Music d a -> Music d a 
+             -> Music d a -> Music d a -> Music d a -> Music d a
+c11 a b c d e f g h i j k = cconcat [a, b, c, d, e, f, g, h, i, j, k]
+c12 :: Num d => Music d a -> Music d a -> Music d a -> Music d a 
+             -> Music d a -> Music d a -> Music d a -> Music d a 
+             -> Music d a -> Music d a -> Music d a -> Music d a 
+             -> Music d a
+c12 a b c d e f g h i j k l = cconcat [a, b, c, d, e, f, g, h, i, j, k, l]
 
 -- | Quadruple the tempo of a composition.
 quad :: Music a b -> Music a b

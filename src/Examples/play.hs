@@ -24,10 +24,10 @@ complex = bang $
 doubleBass = bangR $ 6 !> triplets ( hc >< (3 #> bassDrum2) )
 
 -- | A simple 3/4 polyrhythm, using the ~=~ operator.
-polyrhythm = bangR $ (3, 3 #> bd) ~=~ (4, 4 #> sn)
+polyrhythm = (3, 3 #> bd) ~=~ (4, 4 #> sn)
 
 -- | Some quintuplets!
-quints = bangR $ tempo 4 $ quintuplets $ (hc >< bd) <> (4 #> bd)
+quints = tempo 4 $ quintuplets $ (hc >< bd) <> (4 #> bd)
 
 -- | Intro to 'Toxicity' by System of a Down.
 toxicityIntro =
