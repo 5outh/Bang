@@ -13,6 +13,7 @@ module Bang.Interface.Base where
 
 import Bang.Music.Class
 import Data.Monoid
+import Data.Ratio
 
 -- | 'Rest' for a given duration.
 rest :: Dur -> Music Dur a
@@ -87,6 +88,37 @@ hr = rest (1/2)
 -- | Whole rest
 wr :: Music Dur a
 wr = rest 1
+
+-- Exported separately because it'll be nice to have for Drum
+dots :: Int -> Dur
+dots n = 2 - (1 / (2 ^ n))
+
+dottedRest :: Int -> Dur -> Music Dur a
+dottedRest n d = rest (d * (dots n))
+
+-- | Shorthand for @dottedRest@
+dr :: Int -> Dur -> Music Dur a
+dr = dottedRest
+
+-- | Constructor for a singly-dotted rest
+oneDotRest :: Dur -> Music Dur a
+oneDotRest = dottedRest 1
+
+-- | Eighth Dotted Rest
+edr :: Music Dur a
+edr = oneDotRest (1/8)
+
+-- | Quarter Dotted Rest
+qdr :: Music Dur a
+qdr = oneDotRest (1/4)
+
+-- | Half Dotted Rest
+hdr :: Music Dur a
+hdr = oneDotRest (1/2)
+
+-- | Whole Dotted Rest
+wdr :: Music Dur a
+wdr = oneDotRest 1
 
 -- |Sequence `k` compositions together without the need for lists. 
 -- `m` corresponds to `m` in `mappend`, `mconcat`, etc.
