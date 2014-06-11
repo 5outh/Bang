@@ -30,6 +30,64 @@ bpm n = Modify (BPM n)
 tempo :: Rational -> Music a b -> Music a b
 tempo n = Modify (Tempo (1/n))
 
+-- | Set the time signature of a composition
+-- @n@ is the beat unit, @d@ is the number of beats per measure.
+-- For example, @ts 4 4 ==@ Common time
+ts :: Rational -> Rational -> Music a b -> Music a b
+ts n d = Modify (Tempo (d/n))
+
+-- | Quadruple the tempo of a composition.
+quad :: Music a b -> Music a b
+quad = tempo 4
+
+-- | Double the tempo of a composition.
+double :: Music a b -> Music a b
+double = tempo 2
+
+-- | Set the tempo of a composition to 1 (default, typically idempotent).
+normal :: Music a b -> Music a b
+normal = tempo 1
+
+-- | Half the tempo of a composition.
+half :: Music a b -> Music a b
+half = tempo (1/2)
+
+-- | Quarter the tempo of a composition.
+quarter :: Music a b -> Music a b
+quarter = tempo (1/4)
+
+-- | Convenience constructor for smashing `n` values into a single 1-duration measure.
+tuplets :: Rational -> Music a b -> Music a b
+tuplets n = tempo (n/4)
+
+-- | Play 3 notes per measure.
+triplets :: Music a b -> Music a b
+triplets = tuplets 3
+
+-- | Play 5 notes per measure.
+quintuplets :: Music a b -> Music a b
+quintuplets = tuplets 5
+
+-- | Sixteenth rest
+sr :: Music Dur a
+sr = rest (1/16)
+
+-- | Eighth rest
+er :: Music Dur a
+er = rest (1/8)
+
+-- | Quarter rest
+qr :: Music Dur a
+qr = rest (1/4)
+
+-- | Half rest
+hr :: Music Dur a
+hr = rest (1/2)
+
+-- | Whole rest
+wr :: Music Dur a
+wr = rest 1
+
 -- |Sequence `k` compositions together without the need for lists. 
 -- `m` corresponds to `m` in `mappend`, `mconcat`, etc.
 m2 :: Monoid a => a -> a -> a
@@ -94,55 +152,3 @@ c12 :: Num d => Music d a -> Music d a -> Music d a -> Music d a
              -> Music d a -> Music d a -> Music d a -> Music d a 
              -> Music d a
 c12 a b c d e f g h i j k l = cconcat [a, b, c, d, e, f, g, h, i, j, k, l]
-
--- | Quadruple the tempo of a composition.
-quad :: Music a b -> Music a b
-quad = tempo 4
-
--- | Double the tempo of a composition.
-double :: Music a b -> Music a b
-double = tempo 2
-
--- | Set the tempo of a composition to 1 (default, typically idempotent).
-normal :: Music a b -> Music a b
-normal = tempo 1
-
--- | Half the tempo of a composition.
-half :: Music a b -> Music a b
-half = tempo (1/2)
-
--- | Quarter the tempo of a composition.
-quarter :: Music a b -> Music a b
-quarter = tempo (1/4)
-
--- | Convenience constructor for smashing `n` values into a single 1-duration measure.
-tuplets :: Rational -> Music a b -> Music a b
-tuplets n = tempo (n/4)
-
--- | Play 3 notes per measure.
-triplets :: Music a b -> Music a b
-triplets = tuplets 3
-
--- | Play 5 notes per measure.
-quintuplets :: Music a b -> Music a b
-quintuplets = tuplets 5
-
--- | Sixteenth rest
-sr :: Music Dur a
-sr = rest (1/16)
-
--- | Eighth rest
-er :: Music Dur a
-er = rest (1/8)
-
--- | Quarter rest
-qr :: Music Dur a
-qr = rest (1/4)
-
--- | Half rest
-hr :: Music Dur a
-hr = rest (1/2)
-
--- | Whole rest
-wr :: Music Dur a
-wr = rest 1
