@@ -72,9 +72,40 @@ data PercussionSound =
 drum :: PercussionSound -> Dur -> Music Dur PercussionSound
 drum ps d = Prim (Note d ps)
 
+dottedDrum :: Int -> PercussionSound -> Dur -> Music Dur PercussionSound
+dottedDrum n ps d = drum ps (d * dots n)
+
+oneDotDrum :: PercussionSound -> Dur -> Music Dur PercussionSound
+oneDotDrum = dottedDrum 1 
+
+ed :: PercussionSound -> Music Dur PercussionSound
+ed ps = drum ps (1/8)
+
 -- | Simple constructor for a quarter-note drum hit.
 qd :: PercussionSound -> Music Dur PercussionSound
 qd ps = drum ps (1/4)
+
+hd :: PercussionSound -> Music Dur PercussionSound
+hd ps = drum ps (1/2)
+
+wd :: PercussionSound -> Music Dur PercussionSound
+wd ps = drum ps 1
+
+-- | Eighth Dotted Drum
+edd ::  PercussionSound -> Music Dur PercussionSound
+edd ps = oneDotDrum ps (1/8)
+
+-- | Quarter Dotted Drum
+qdd ::  PercussionSound -> Music Dur PercussionSound
+qdd ps = oneDotDrum ps (1/4)
+
+-- | Half Dotted Drum
+hdd ::  PercussionSound -> Music Dur PercussionSound
+hdd ps = oneDotDrum ps (1/2)
+
+-- | Whole Dotted Drum
+wdd :: PercussionSound -> Music Dur PercussionSound
+wdd ps = oneDotDrum ps 1
 
 -- | Get the MIDI offset number for a 'PercussionSound'
 toMIDINum :: PercussionSound -> Int

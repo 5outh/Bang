@@ -106,5 +106,5 @@ runComposition = do
       when (s < t) $ do
         put (conn, xs)
         lift $ send conn ev
-      lift $ threadDelay 1000
+      lift $ threadDelay 250
       runComposition
