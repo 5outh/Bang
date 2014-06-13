@@ -117,7 +117,7 @@ To play only the first part of a composition, use `takeDur` or `<<~`. To chop of
 
 ##### Silencing
 
-To instead silence parts of a composition, use `hushFor` (`~@>`) to silence fron the beginning, or `hushFrom` (`<@~`) to silence from some point until the end of a composition:
+To instead silence parts of a composition, use `hushFor` (`~@>`) to silence from the beginning, or `hushFrom` (`<@~`) to silence from some point until the end of a composition:
 
 ```haskell
 > bang $ (1/4) ~@> ( 2 #> (bd <> sn) ) -- Play a quarter rest, then bd, sn, bd
