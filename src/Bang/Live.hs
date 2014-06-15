@@ -3,7 +3,7 @@ module Bang.Live where
 import Control.Concurrent
 import System.IO.Unsafe
 import Data.IORef
-import Control.Monad(forever)
+import Control.Monad(forever, when)
 import Data.Time.Clock.POSIX
 import Control.Applicative((<$>))
 
@@ -29,25 +29,31 @@ import Bang
 --   threadDelay 10000
 
 waitTime :: IORef Int
-waitTime = unsafePerformIO (newIORef 1000000)
+waitTime = unsafePerformIO (newIORef 0)
 
-bangLWith :: Options -> Music Dur PercussionSound -> IO ThreadId
+bangLWith :: Options -> Music Dur PercussionSound -> IO (ThreadId, ThreadId)
 bangLWith (Options oBpm oTempo) m = do
   startTime <- round . (*1000000) <$> getPOSIXTime
-  print startTime
-  -- constantly update waitTime (mod bpm -> ns) (fork?)
-  -- forkIO the music and return threadId
-  undefined
+  let spb     = (60 :: Float) / (fromIntegral oBpm)
+      beatLen = round $ spb * 1000000 -- length of a single beat, in ns
+
+  -- constantly update waitTime
+  metronome <- forkIO $ forever $ do
+    time <- round . (*1000000) <$> getPOSIXTime
+    writeIORef waitTime (beatLen - (time `mod` beatLen))
+
+  -- forkIO the music and return both thread IDs
+  music <- forkIO $ bangR m
+
+  return (metronome, music)
 
 -- i.e m2 <- m1 `killThen` (bangR $ bd <> hc <> bd <> bd)
 -- could also make this more generic, auto-repeating.
-killThen :: ThreadId 
-          -> IO () {- / Music Dur PercussionSound -} 
+killThen :: ThreadId
+          -> Music Dur PercussionSound
           -> IO ThreadId
-killThen tid io {- / m -} = do
-  killThread tid
+killThen tid m = do
   ref <- readIORef waitTime
-  threadDelay ref
-  r <- forkIO io
-  {- / r <- forkIO $ bangR m -}
-  return r
+  print ref
+  killThread tid
+  forkIO $ threadDelay ref >> bangR m
