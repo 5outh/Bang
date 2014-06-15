@@ -47,13 +47,19 @@ bangLWith (Options oBpm oTempo) m = do
 
   return (metronome, music)
 
--- i.e m2 <- m1 `killThen` (bangR $ bd <> hc <> bd <> bd)
--- could also make this more generic, auto-repeating.
+-- i.e m2 <- m1 `killThen` (bd <> hc <> bd <> bd)
 killThen :: ThreadId
           -> Music Dur PercussionSound
           -> IO ThreadId
 killThen tid m = do
   ref <- readIORef waitTime
-  print ref
   killThread tid
+  forkIO $ threadDelay ref >> bangR m
+
+-- Add another track to play concurrently with the currently playing track.
+addTrack :: ThreadId 
+         -> Music Dur PercussionSound
+         -> IO ThreadId
+addTrack tid m = do
+  ref <- readIORef waitTime
   forkIO $ threadDelay ref >> bangR m
