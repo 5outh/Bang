@@ -31,21 +31,29 @@ import Bang
 waitTime :: IORef Int
 waitTime = unsafePerformIO (newIORef 0)
 
-bangLWith :: Options -> Music Dur PercussionSound -> IO (ThreadId, ThreadId)
+metronome :: MVar ThreadId
+metronome = unsafePerformIO newEmptyMVar
+
+bangL :: Music Dur PercussionSound -> IO ThreadId
+bangL = bangLWith defaultOptions
+
+bangLWith :: Options -> Music Dur PercussionSound -> IO ThreadId
 bangLWith (Options oBpm oTempo) m = do
   startTime <- round . (*1000000) <$> getPOSIXTime
   let spb     = (60 :: Float) / (fromIntegral oBpm)
       beatLen = round $ spb * 1000000 -- length of a single beat, in ns
 
   -- constantly update waitTime
-  metronome <- forkIO $ forever $ do
+  met <- forkIO $ forever $ do
     time <- round . (*1000000) <$> getPOSIXTime
     writeIORef waitTime (beatLen - (time `mod` beatLen))
 
-  -- forkIO the music and return both thread IDs
+  --putMVar metronome met
+
+  -- forkIO the music and return threadId
   music <- forkIO $ bangR m
 
-  return (metronome, music)
+  return (met, music)
 
 -- i.e m2 <- m1 `killThen` (bd <> hc <> bd <> bd)
 killThen :: ThreadId
@@ -57,7 +65,7 @@ killThen tid m = do
   forkIO $ threadDelay ref >> bangR m
 
 -- Add another track to play concurrently with the currently playing track.
-addTrack :: ThreadId 
+addTrack :: ThreadId
          -> Music Dur PercussionSound
          -> IO ThreadId
 addTrack tid m = do
