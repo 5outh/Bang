@@ -4,6 +4,8 @@ import Control.Concurrent
 import System.IO.Unsafe
 import Data.IORef
 import Control.Monad(forever)
+import Data.Time.Clock.POSIX
+import Control.Applicative((<$>))
 
 import Bang
 
@@ -26,5 +28,26 @@ import Bang
 --   modifyIORef' counter (+1)
 --   threadDelay 10000
 
-bangLWith :: Options -> Music Dur PercussionSound -> IO ()
-bangLWith (Options oBpm oTempo) m = undefined -- @TODO
+waitTime :: IORef Int
+waitTime = unsafePerformIO (newIORef 1000000)
+
+bangLWith :: Options -> Music Dur PercussionSound -> IO ThreadId
+bangLWith (Options oBpm oTempo) m = do
+  startTime <- round . (*1000000) <$> getPOSIXTime
+  print startTime
+  -- constantly update waitTime (mod bpm -> ns) (fork?)
+  -- forkIO the music and return threadId
+  undefined
+
+-- i.e m2 <- m1 `killThen` (bangR $ bd <> hc <> bd <> bd)
+-- could also make this more generic, auto-repeating.
+killThen :: ThreadId 
+          -> IO () {- / Music Dur PercussionSound -} 
+          -> IO ThreadId
+killThen tid io {- / m -} = do
+  killThread tid
+  ref <- readIORef waitTime
+  threadDelay ref
+  r <- forkIO io
+  {- / r <- forkIO $ bangR m -}
+  return r

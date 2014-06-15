@@ -19,6 +19,7 @@ module Bang(
 , defaultOptions
 , module Bang.Music
 , module Bang.Interface
+, (<>)
 ) where
 
 import Control.Monad
