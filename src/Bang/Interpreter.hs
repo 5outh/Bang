@@ -8,7 +8,6 @@ import Data.Bifunctor
 import Data.Ratio
 import Data.Monoid
 
-
 toList :: Music Dur PercussionSound -> [MidiEvent]
 toList m = map drumToMidiEvent (interpret m)
 

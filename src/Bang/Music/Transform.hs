@@ -92,8 +92,8 @@ hushLast :: Dur -> Music Dur b -> Music Dur b
 hushLast d m = hushFrom (duration m - d) m
 
 -- |Turn everything but the last `d` duration units into silence
-hushUntil :: Dur -> Music Dur b -> Music Dur b
-hushUntil d m = hushFor (duration m - d) m 
+hushUntilLast :: Dur -> Music Dur b -> Music Dur b
+hushUntilLast d m = hushFor (duration m - d) m 
 
 -- |Turn the section of a composition between `pos` and `d` into silence.
 hushBetween :: Dur -> Dur -> Music Dur b -> Music Dur b
