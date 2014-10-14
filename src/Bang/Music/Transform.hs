@@ -60,7 +60,19 @@ dropDur = go
                     p@(Prim (Note d' _)) -> rest 0
                     (a :+: b)    -> go dr a :+: go (dr - duration a) b
                     (a :=: b)    -> go dr a :=: go dr b
-                    (Modify c a) -> Modify c (go dr a)   
+                    (Modify c a) -> Modify c (go dr a)
+
+-- |Take the last `d` duration units of a composition
+takeLast :: Dur -> Music Dur b -> Music Dur b
+takeLast d m = dropDur (duration m - d) m
+
+-- |Drop the last `d` duration units of a composition
+dropLast :: Dur -> Music Dur b -> Music Dur b
+dropLast d m = takeDur (duration m - d) m
+
+-- |Remove the section of the composition between `d1` and `d2`.
+removeBetween :: Dur -> Dur -> Music Dur b -> Music Dur b
+removeBetween d1 d2 m = takeDur d1 m <> dropDur d2 m
 
 -- |Split a composition at a specific duration and return the composition
 -- before said duration along with the rest of it. 
@@ -75,9 +87,17 @@ hushFor d m = rest d <> dropDur d m
 hushFrom :: Dur -> Music Dur b -> Music Dur b
 hushFrom d m = takeDur d m <> rest (max (duration m - d) 0)
 
+-- |Turn the last `d` duration units into silence
+hushLast :: Dur -> Music Dur b -> Music Dur b
+hushLast d m = hushFrom (duration m - d) m
+
+-- |Turn everything but the last `d` duration units into silence
+hushUntil :: Dur -> Music Dur b -> Music Dur b
+hushUntil d m = hushFor (duration m - d) m 
+
 -- |Turn the section of a composition between `pos` and `d` into silence.
-hushAt :: Dur -> Dur -> Music Dur b -> Music Dur b
-hushAt pos d m = pre <> rest d <> dropDur d post
+hushBetween :: Dur -> Dur -> Music Dur b -> Music Dur b
+hushBetween pos d m = pre <> rest d <> dropDur d post
   where (pre, post) = partitionDur pos m
 
 -- |Play a polyrhythm with 'm' having units of length 1\/x and 'n' with units of length 1\/y
