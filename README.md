@@ -6,7 +6,7 @@ An <b>E</b>mbedded <b>D</b>omain <b>S</b>pecific <b>L</b>anguage for writing dru
 Bang interfaces with your system MIDI device in order to play drum compositions, directly written in and 
 interpreted by the Haskell programming language.
 
-Currently, Bang only supports OSX Mavericks. Windows playback works, but is finnicky. In particular, if you interrupt a composition launched from a ghci interpreter session, the built-in MIDI synthesizer will complain about already being in use the next time you attempt to play something, until ghci is reloaded. This issue does not arise when playing songs from files. If you define a `main` function in an external file, and compile and run it, interrupting compositions should work fine.
+Currently, Bang only supports OSX. Windows playback works, but is finnicky. In particular, if you interrupt a composition launched from a ghci interpreter session, the built-in MIDI synthesizer will complain about already being in use the next time you attempt to play something, until ghci is reloaded. This issue does not arise when playing songs from files. If you define a `main` function in an external file, and compile and run it, interrupting compositions should work fine.
 
 ### Installing
 
