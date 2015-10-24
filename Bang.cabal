@@ -1,7 +1,7 @@
 name:                Bang
 version:             0.1.1.0
 synopsis:            A Drum Machine DSL for Haskell
-description:         
+description:
   This library consists of a DSL for piecing together drum compositions. It uses a MIDI backend
   and is only currently available for use on Mac OSX. Much of the library was inspired by previous work done by Yale's
   @<http://haskell.cs.yale.edu/euterpea/ Euterpea>@ project and Paul Hudak\'s @<http://cpsc.yale.edu/sites/default/files/files/tr1259.pdf paper>@.
@@ -10,7 +10,7 @@ license:             MIT
 license-file:        LICENSE
 author:              Benjamin Kovach
 maintainer:          bkovach13@gmail.com
--- copyright:           
+-- copyright:
 category:            Sound
 build-type:          Simple
 extra-source-files:  README.md
@@ -22,8 +22,8 @@ library
                        Bang.Interface.Base,
                        Bang.Interface.Drum,
                        Bang.Music,
-                       Bang.Music.Class, 
-                       Bang.Music.Operators, 
+                       Bang.Music.Class,
+                       Bang.Music.Operators,
                        Bang.Music.Transform,
                        Bang.Experimental.Live,
                        Bang.Experimental.SequentialDo,
@@ -31,8 +31,8 @@ library
 
   other-modules:       Bang.Interpreter
 
-  build-depends:       base >=4.6 && <5, 
-                       mtl >=2.1 && <3, 
+  build-depends:       base >=4.6 && <5,
+                       mtl >=2.1 && <3,
                        transformers >=0.3 && <0.4,
                        bifunctors >= 4 && <5,
                        stm >= 2.4 && < 5,
