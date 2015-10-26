@@ -13,7 +13,7 @@ Currently, Bang only supports OSX. Windows playback works, but is finnicky. In p
 Installation of the library is simple using [`stack`](https://github.com/commercialhaskell/stack).
 
 ```
-> stack install Bang --resolver=lts-2.2
+> stack install Bang --resolver=lts-2.22
 ```
 
 On Windows (*again, not recommended*), You should be good to go at this point. If you see **Using MIDI Device: Microsoft GS Wavetable Synth** when playing your first composition, you're set. If this happens but nothing plays, please contact me.
