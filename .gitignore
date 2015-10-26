@@ -11,3 +11,4 @@ cabal.sandbox.config
 cabal.config
 dist/
 docgen.sh
+.stack-work/
