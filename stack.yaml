@@ -1,6 +1,7 @@
-resolver: lts-2.22
+resolver: lts-5.0
 packages:
 - '.'
 flags: {}
 extra-deps:
-- hmidi-0.2.2.0
+- PortMidi-0.1.5.2
+

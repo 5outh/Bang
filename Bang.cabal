@@ -31,13 +31,14 @@ library
 
   other-modules:       Bang.Interpreter
 
-  build-depends:       base >=4.6 && <5,
-                       mtl >=2.1 && <3,
-                       transformers >=0.3 && <0.4,
-                       bifunctors >= 4 && <5,
-                       stm >= 2.4 && < 5,
-                       hmidi >= 0.2.1 && < 3.0,
-                       time >= 1.4.2 && < 1.5
+  build-depends:       base,
+                       mtl,
+                       transformers,
+                       bifunctors,
+                       stm,
+                       time,
+                       HCodecs,
+                       PortMidi         
 
   hs-source-dirs:      src
   default-language:    Haskell2010

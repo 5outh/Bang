@@ -199,6 +199,7 @@ bell = rideBell
 clap :: Music Dur PercussionSound
 clap = handClap
 
+-- TODO: Use new MidiEvent type from PortMidi
 -- | Convert a primitive 'PercussionSound' to a 'MidiEvent'
 drumToMidiEvent :: Primitive Dur PercussionSound -> MidiEvent
 drumToMidiEvent (Note d ps) = MidiEvent (fromIntegral (round d)) (MidiMessage 10 (NoteOn (fromEnum ps + 35) 64))
