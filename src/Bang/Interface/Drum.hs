@@ -13,12 +13,12 @@ slightly longer construction functions, but you'll find all of the sounds\' cons
 -}
 module Bang.Interface.Drum where
 
-import Bang.Music.Class
-import Bang.Interface.Base
-import System.MIDI
+import           Bang.Interface.Base
+import           Bang.Music.Class
+import           System.MIDI
 
 -- | An Enum representing the different types of things you can bang on.
-data PercussionSound = 
+data PercussionSound =
    BassDrum2
  | BassDrum1
  | SideStick
@@ -69,42 +69,42 @@ data PercussionSound =
     deriving (Show,Eq,Ord,Enum)
 
 -- | Convenience constructor for drum sounds
-drum :: PercussionSound -> Dur -> Music Dur PercussionSound
+drum :: PercussionSound -> Rational -> Music PercussionSound
 drum ps d = Prim (Note d ps)
 
-dottedDrum :: Int -> PercussionSound -> Dur -> Music Dur PercussionSound
+dottedDrum :: Int -> PercussionSound -> Rational -> Music PercussionSound
 dottedDrum n ps d = drum ps (d * dots n)
 
-oneDotDrum :: PercussionSound -> Dur -> Music Dur PercussionSound
-oneDotDrum = dottedDrum 1 
+oneDotDrum :: PercussionSound -> Rational -> Music PercussionSound
+oneDotDrum = dottedDrum 1
 
-ed :: PercussionSound -> Music Dur PercussionSound
-ed ps = drum ps (1/8)
+ed :: PercussionSound -> Music PercussionSound
+ed ps = drum ps (1 / 8)
 
 -- | Simple constructor for a quarter-note drum hit.
-qd :: PercussionSound -> Music Dur PercussionSound
-qd ps = drum ps (1/4)
+qd :: PercussionSound -> Music PercussionSound
+qd ps = drum ps (1 / 4)
 
-hd :: PercussionSound -> Music Dur PercussionSound
-hd ps = drum ps (1/2)
+hd :: PercussionSound -> Music PercussionSound
+hd ps = drum ps (1 / 2)
 
-wd :: PercussionSound -> Music Dur PercussionSound
+wd :: PercussionSound -> Music PercussionSound
 wd ps = drum ps 1
 
 -- | Eighth Dotted Drum
-edd ::  PercussionSound -> Music Dur PercussionSound
-edd ps = oneDotDrum ps (1/8)
+edd :: PercussionSound -> Music PercussionSound
+edd ps = oneDotDrum ps (1 / 8)
 
 -- | Quarter Dotted Drum
-qdd ::  PercussionSound -> Music Dur PercussionSound
-qdd ps = oneDotDrum ps (1/4)
+qdd :: PercussionSound -> Music PercussionSound
+qdd ps = oneDotDrum ps (1 / 4)
 
 -- | Half Dotted Drum
-hdd ::  PercussionSound -> Music Dur PercussionSound
-hdd ps = oneDotDrum ps (1/2)
+hdd :: PercussionSound -> Music PercussionSound
+hdd ps = oneDotDrum ps (1 / 2)
 
 -- | Whole Dotted Drum
-wdd :: PercussionSound -> Music Dur PercussionSound
+wdd :: PercussionSound -> Music PercussionSound
 wdd ps = oneDotDrum ps 1
 
 -- | Get the MIDI offset number for a 'PercussionSound'
@@ -112,234 +112,237 @@ toMIDINum :: PercussionSound -> Int
 toMIDINum ps = fromEnum ps + 35
 
 -- | Closed Hi Hat
-hc :: Music Dur PercussionSound
+hc :: Music PercussionSound
 hc = closedHihat
 
 -- | Open Hi Hat
-ho :: Music Dur PercussionSound
+ho :: Music PercussionSound
 ho = openHihat
 
 -- | Pedal Hi Hat
-hco :: Music Dur PercussionSound
+hco :: Music PercussionSound
 hco = pedalHihat
 
 -- | Bass Drum
-bd :: Music Dur PercussionSound
+bd :: Music PercussionSound
 bd = bassDrum1
 
 -- | Bass Drum (alt)
-bd2 :: Music Dur PercussionSound
+bd2 :: Music PercussionSound
 bd2 = bassDrum2
 
 -- | Snare
-sn :: Music Dur PercussionSound
+sn :: Music PercussionSound
 sn = snareDrum1
 
 -- | Snare (alt)
-sn2 :: Music Dur PercussionSound
+sn2 :: Music PercussionSound
 sn2 = snareDrum2
 
 -- | Snare Sidestick
-stick :: Music Dur PercussionSound
+stick :: Music PercussionSound
 stick = sideStick
 
 -- | High Tom
-t1 :: Music Dur PercussionSound
+t1 :: Music PercussionSound
 t1 = highTom1
 
 -- | High Tom (alt)
-t2 :: Music Dur PercussionSound
+t2 :: Music PercussionSound
 t2 = highTom2
 
 -- | Mid Tom
-t3 :: Music Dur PercussionSound
+t3 :: Music PercussionSound
 t3 = midTom1
 
 -- | Mid Tom (alt)
-t4 :: Music Dur PercussionSound
+t4 :: Music PercussionSound
 t4 = midTom2
 
 -- | Low Tom
-t5 :: Music Dur PercussionSound
+t5 :: Music PercussionSound
 t5 = lowTom1
 
 -- | Low Tom (alt)
-t6 :: Music Dur PercussionSound
+t6 :: Music PercussionSound
 t6 = lowTom2
 
 -- | Crash Cymbal
-cc :: Music Dur PercussionSound
-cc  = crashCymbal1
+cc :: Music PercussionSound
+cc = crashCymbal1
 
 -- | Crash Cymbal (alt)
-cc2 :: Music Dur PercussionSound
+cc2 :: Music PercussionSound
 cc2 = crashCymbal2
 
 -- | Ride Cymbal
-rc :: Music Dur PercussionSound
-rc  = rideCymbal1
+rc :: Music PercussionSound
+rc = rideCymbal1
 
 -- | Ride Cymbal (alt)
-rc2 :: Music Dur PercussionSound
+rc2 :: Music PercussionSound
 rc2 = rideCymbal2
 
 -- | China Cymbal
-china :: Music Dur PercussionSound
-china  = chineseCymbal
+china :: Music PercussionSound
+china = chineseCymbal
 
 -- | Splash Cymbal
-splash :: Music Dur PercussionSound
+splash :: Music PercussionSound
 splash = splashCymbal
 
 -- | Bell
-bell :: Music Dur PercussionSound
+bell :: Music PercussionSound
 bell = rideBell
 
 -- | Hand Clap
-clap :: Music Dur PercussionSound
+clap :: Music PercussionSound
 clap = handClap
 
 -- | Convert a primitive 'PercussionSound' to a 'MidiEvent'
-drumToMidiEvent :: Primitive Dur PercussionSound -> MidiEvent
-drumToMidiEvent (Note d ps) = MidiEvent (fromIntegral (round d)) (MidiMessage 10 (NoteOn (fromEnum ps + 35) 64))
+drumToMidiEvent :: Primitive PercussionSound -> MidiEvent
+drumToMidiEvent (Rest _   ) = error "rests cannot be converted to midi events"
+drumToMidiEvent (Note d ps) = MidiEvent
+  (fromIntegral (round d :: Integer))
+  (MidiMessage 10 (NoteOn (fromEnum ps + 35) 64))
 
-bassDrum2 :: Music Dur PercussionSound
+bassDrum2 :: Music PercussionSound
 bassDrum2 = qd BassDrum2
 
-bassDrum1 :: Music Dur PercussionSound
+bassDrum1 :: Music PercussionSound
 bassDrum1 = qd BassDrum1
 
-sideStick :: Music Dur PercussionSound
+sideStick :: Music PercussionSound
 sideStick = qd SideStick
 
-snareDrum1 :: Music Dur PercussionSound
+snareDrum1 :: Music PercussionSound
 snareDrum1 = qd SnareDrum1
 
-handClap :: Music Dur PercussionSound
+handClap :: Music PercussionSound
 handClap = qd HandClap
 
-snareDrum2 :: Music Dur PercussionSound
+snareDrum2 :: Music PercussionSound
 snareDrum2 = qd SnareDrum2
 
-lowTom2 :: Music Dur PercussionSound
+lowTom2 :: Music PercussionSound
 lowTom2 = qd LowTom2
 
-closedHihat :: Music Dur PercussionSound
+closedHihat :: Music PercussionSound
 closedHihat = qd ClosedHihat
 
-lowTom1 :: Music Dur PercussionSound
+lowTom1 :: Music PercussionSound
 lowTom1 = qd LowTom1
 
-pedalHihat :: Music Dur PercussionSound
+pedalHihat :: Music PercussionSound
 pedalHihat = qd PedalHihat
 
-midTom2 :: Music Dur PercussionSound
+midTom2 :: Music PercussionSound
 midTom2 = qd MidTom2
 
-openHihat :: Music Dur PercussionSound
+openHihat :: Music PercussionSound
 openHihat = qd OpenHihat
 
-midTom1 :: Music Dur PercussionSound
+midTom1 :: Music PercussionSound
 midTom1 = qd MidTom1
 
-highTom2 :: Music Dur PercussionSound
+highTom2 :: Music PercussionSound
 highTom2 = qd HighTom2
 
-crashCymbal1 :: Music Dur PercussionSound
+crashCymbal1 :: Music PercussionSound
 crashCymbal1 = qd CrashCymbal1
 
-highTom1 :: Music Dur PercussionSound
+highTom1 :: Music PercussionSound
 highTom1 = qd HighTom1
 
-rideCymbal1 :: Music Dur PercussionSound
+rideCymbal1 :: Music PercussionSound
 rideCymbal1 = qd RideCymbal1
 
-chineseCymbal :: Music Dur PercussionSound
+chineseCymbal :: Music PercussionSound
 chineseCymbal = qd ChineseCymbal
 
-rideBell :: Music Dur PercussionSound
+rideBell :: Music PercussionSound
 rideBell = qd RideBell
 
-tambourine :: Music Dur PercussionSound
+tambourine :: Music PercussionSound
 tambourine = qd Tambourine
 
-splashCymbal :: Music Dur PercussionSound
+splashCymbal :: Music PercussionSound
 splashCymbal = qd SplashCymbal
 
-cowbell :: Music Dur PercussionSound
+cowbell :: Music PercussionSound
 cowbell = qd Cowbell
 
-crashCymbal2 :: Music Dur PercussionSound
+crashCymbal2 :: Music PercussionSound
 crashCymbal2 = qd CrashCymbal2
 
-vibraSlap :: Music Dur PercussionSound
+vibraSlap :: Music PercussionSound
 vibraSlap = qd VibraSlap
 
-rideCymbal2 :: Music Dur PercussionSound
+rideCymbal2 :: Music PercussionSound
 rideCymbal2 = qd RideCymbal2
 
-highBongo :: Music Dur PercussionSound
+highBongo :: Music PercussionSound
 highBongo = qd HighBongo
 
-lowBongo :: Music Dur PercussionSound
+lowBongo :: Music PercussionSound
 lowBongo = qd LowBongo
 
-muteHighConga :: Music Dur PercussionSound
+muteHighConga :: Music PercussionSound
 muteHighConga = qd MuteHighConga
 
-openHighConga :: Music Dur PercussionSound
+openHighConga :: Music PercussionSound
 openHighConga = qd OpenHighConga
 
-lowConga :: Music Dur PercussionSound
+lowConga :: Music PercussionSound
 lowConga = qd LowConga
 
-highTimbale :: Music Dur PercussionSound
+highTimbale :: Music PercussionSound
 highTimbale = qd HighTimbale
 
-lowTimbale :: Music Dur PercussionSound
+lowTimbale :: Music PercussionSound
 lowTimbale = qd LowTimbale
 
-highAgogo :: Music Dur PercussionSound
+highAgogo :: Music PercussionSound
 highAgogo = qd HighAgogo
 
-lowAgogo :: Music Dur PercussionSound
+lowAgogo :: Music PercussionSound
 lowAgogo = qd LowAgogo
 
-cabasa :: Music Dur PercussionSound
+cabasa :: Music PercussionSound
 cabasa = qd Cabasa
 
-maracas :: Music Dur PercussionSound
+maracas :: Music PercussionSound
 maracas = qd Maracas
 
-shortWhistle :: Music Dur PercussionSound
+shortWhistle :: Music PercussionSound
 shortWhistle = qd ShortWhistle
 
-longWhistle :: Music Dur PercussionSound
+longWhistle :: Music PercussionSound
 longWhistle = qd LongWhistle
 
-shortGuiro :: Music Dur PercussionSound
+shortGuiro :: Music PercussionSound
 shortGuiro = qd ShortGuiro
 
-longGuiro :: Music Dur PercussionSound
+longGuiro :: Music PercussionSound
 longGuiro = qd LongGuiro
 
-claves :: Music Dur PercussionSound
+claves :: Music PercussionSound
 claves = qd Claves
 
-highWoodBlock :: Music Dur PercussionSound
+highWoodBlock :: Music PercussionSound
 highWoodBlock = qd HighWoodBlock
 
-lowWoodBlock :: Music Dur PercussionSound
+lowWoodBlock :: Music PercussionSound
 lowWoodBlock = qd LowWoodBlock
 
-muteCuica :: Music Dur PercussionSound
+muteCuica :: Music PercussionSound
 muteCuica = qd MuteCuica
 
-openCuica :: Music Dur PercussionSound
+openCuica :: Music PercussionSound
 openCuica = qd OpenCuica
 
-muteTriangle :: Music Dur PercussionSound
+muteTriangle :: Music PercussionSound
 muteTriangle = qd MuteTriangle
 
-openTriangle :: Music Dur PercussionSound
+openTriangle :: Music PercussionSound
 openTriangle = qd OpenTriangle

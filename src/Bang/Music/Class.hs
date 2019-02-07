@@ -9,124 +9,114 @@ Portability : Mac OSX
 
 Implements the core data structures for use in the Bang library.
 -}
+{-# LANGUAGE LambdaCase                #-}
 {-# LANGUAGE NoMonomorphismRestriction #-}
 module Bang.Music.Class where
 
-import Prelude hiding(foldr)
+import           Prelude       hiding (foldr)
 
-import Data.Ratio
-import Data.Monoid
-import Data.Foldable
-import Data.Bifunctor
-import Data.Bifoldable
+import           Data.Foldable
 
-type Dur = Rational
 
--- |Primitive objects in music are simply notes with duration and type, or rests with only duration.
-data Primitive d a = 
+-- | Primitive objects in music are simply notes with duration and type, or rests with only duration.
+data Primitive a =
     -- | A `Note` with duration `dur` and type `ntype`
-    Note {dur :: d, ntype :: a}
-    -- | A `Rest` with duration `dur`
-  | Rest {dur :: d}
+    Note {duration :: Rational, noteType :: a}
+    -- | A `Rest` with a duration
+  | Rest {duration :: Rational}
     deriving (Show, Eq)
 
-instance Functor (Primitive dur) where
+mapDuration :: (Rational -> Rational) -> Primitive a -> Primitive a
+mapDuration f (Note dur a) = Note (f dur) a
+mapDuration f (Rest dur  ) = Rest (f dur)
+
+instance Functor Primitive where
   fmap f (Note d a) = Note d (f a)
-  fmap f (Rest d)   = Rest d
+  fmap _ (Rest d)   = Rest d
 
 -- | A musical composition with duration type dur (typically `Dur`) and instrument type `a` (typically a `PercussionSound`)
-data Music dur a = 
+data Music a =
     -- | A Primitive musical object.
-    Prim (Primitive dur a)
+    Prim (Primitive a)
     -- | Sequential composition of music
-  | Music dur a :+: Music dur a
+  | Music a :+: Music a
     -- | Parallel composition of music
-  | Music dur a :=: Music dur a
+  | Music a :=: Music a
     -- | Modifier (typically 'BPM' or 'Tempo' change)
-  | Modify Control (Music dur a)
+  | Modify Control (Music a)
     deriving (Show, Eq)
 
+mapMusicDuration :: (Rational -> Rational) -> Music a -> Music a
+mapMusicDuration f = \case
+  Prim p        -> Prim $ mapDuration f p
+  ma     :+: mb -> mapMusicDuration f ma :+: mapMusicDuration f mb
+  ma     :=: mb -> mapMusicDuration f ma :+: mapMusicDuration f mb
+  Modify c   ma -> Modify c (mapMusicDuration f ma)
+
 -- | Simple data type representing different control structures for compositions.
-data Control = 
-    BPM Integer               
+data Control =
+    BPM Integer
     -- ^ Set the beats per minute (WARNING: Only set this once, or BPM will multiply!)
-  | Tempo Rational            
+  | Tempo Rational
     -- ^ Set the speed for a section of music (default 1)
-  | Instrument InstrumentName 
+  | Instrument InstrumentName
     -- ^ Change the instrument (currently unused)
     deriving (Show, Eq)
 
-{-
-  NB. `Music` under `:=:` also forms a monoid, so we'll give these similar names...
--}
-instance Num dur => Monoid (Music dur a) where
-  mappend = (:+:)
+
+instance Semigroup (Music a) where
+  (<>) = (:+:)
+
+instance Monoid (Music a) where
   mempty = Prim (Rest 0)
 
-{-
-  `fmap` (and `second`) maps over parameterized type (typically a Drum),
-  and `first` maps over duration.
--}
-instance Functor (Music dur) where
-  fmap f (Prim m) = Prim (fmap f m)
-  fmap f (a :+: b) = fmap f a :+: fmap f b
-  fmap f (a :=: b) = fmap f a :=: fmap f b
+instance Functor Music where
+  fmap f (Prim m)     = Prim (fmap f m)
+  fmap f (a :+: b)    = fmap f a :+: fmap f b
+  fmap f (a :=: b)    = fmap f a :=: fmap f b
   fmap f (Modify c a) = Modify c (fmap f a)
-
-instance Bifunctor Music where
-  bimap f g (Prim (Note dur a)) = Prim $ Note (f dur) (g a)
-  bimap f g (Prim (Rest dur))   = Prim $ Rest (f dur)
-  bimap f g (a :+: b) = bimap f g a :+: bimap f g b
-  bimap f g (a :=: b) = bimap f g a :=: bimap f g b
-  bimap f g (Modify c a) = Modify c (bimap f g a)
 
 {-
   `foldMap` folds over parameterized type (typically a Drum),
   and `bifoldMap` folds over duration as well.
 -}
-instance Foldable (Music dur) where
-  foldMap f (Prim (Rest _)) = mempty
-  foldMap f (Prim (Note _ a)) = f a 
-  foldMap f (a :+: b) = foldMap f a `mappend` foldMap f b
-  foldMap f (a :=: b) = foldMap f a `mappend` foldMap f b
-  foldMap f (Modify c a) = foldMap f a
-
-instance Bifoldable Music where
-  bifoldMap f g (Prim (Note dur a)) = f dur `mappend` g a
-  bifoldMap f g (Prim (Rest dur)) = f dur
-  bifoldMap f g (a :+: b) = bifoldMap f g a `mappend` bifoldMap f g b
-  bifoldMap f g (a :=: b) = bifoldMap f g a `mappend` bifoldMap f g b
-  bifoldMap f g (Modify c a) = bifoldMap f g a
+instance Foldable Music where
+  foldMap _ (Prim (Rest _))   = mempty
+  foldMap f (Prim (Note _ a)) = f a
+  foldMap f (a :+: b)         = foldMap f a `mappend` foldMap f b
+  foldMap f (a :=: b)         = foldMap f a `mappend` foldMap f b
+  foldMap f (Modify _ a)      = foldMap f a
 
 -- | Simple data type representing the types of instruments Bang supports.
--- 
+--
 -- Currently, the only value is 'DrumSet'.
 data InstrumentName = DrumSet
   deriving (Show, Eq)
 
 -- | Get the duration of a full composition
-duration :: (Fractional a, Ord a) => Music a b -> a
-duration (a :+: b) = duration a + duration b
-duration (a :=: b) = max (duration a) (duration b)
-duration (Modify (Tempo n) m) = duration (first (* fromRational n) m)
-duration (Modify _ m) = duration m
-duration (Prim (Note d a)) = d
-duration (Prim (Rest d)) = d
+musicDuration :: Music a -> Rational
+musicDuration (a :+: b) = musicDuration a + musicDuration b
+musicDuration (a :=: b) = max (musicDuration a) (musicDuration b)
+musicDuration (Modify (Tempo n) m) =
+  musicDuration (mapMusicDuration (* fromRational n) m)
+musicDuration (Modify _ m     ) = musicDuration m
+musicDuration (Prim (Note d _)) = d
+musicDuration (Prim (Rest d  )) = d
 
 -- | Parallel 'mappend'
 --
 -- Part of a second 'Monoid' "instance" for 'Music'
-cappend :: Music dur a -> Music dur a -> Music dur a
+cappend :: Music a -> Music a -> Music a
 cappend = (:=:)
 
 -- | Parallel 'mempty'
 --
 -- Part of a second 'Monoid' "instance" for 'Music'
-cempty :: Num dur => Music dur a
-cempty  = Prim (Rest 0)
+cempty :: Music a
+cempty = Prim (Rest 0)
 
 -- | Parallel 'mconcat'
--- 
+--
 -- Part of a second 'Monoid' "instance" for 'Music'
-cconcat :: Num dur => [Music dur a] -> Music dur a
+cconcat :: [Music a] -> Music a
 cconcat = foldr cappend cempty

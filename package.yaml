@@ -1,0 +1,22 @@
+name: Bang
+version: 0.2.0.0
+synopsis: A Drum Machine DSL for Haskell
+description: This library consists of a DSL for piecing together drum compositions.
+maintainer: Benjamin Kovach <bkovach13@gmail.com>
+github: 5outh/Bang
+category: Music
+
+ghc-options: -Wall
+
+dependencies:
+  - base >= 4.9 && < 5
+  - base
+  - mtl
+  - transformers
+  - bifunctors
+  - stm
+  - hmidi
+  - time
+
+library:
+  source-dirs: src

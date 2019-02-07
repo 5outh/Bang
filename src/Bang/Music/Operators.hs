@@ -11,25 +11,23 @@ Defines a number of operators to effectively piece together Bang compositions.
 -}
 module Bang.Music.Operators where
 
-import Bang.Music.Class
-import Bang.Music.Transform
-import Bang.Interface.Base
-import Data.Foldable(foldMap)
-
-import Data.Monoid
+import           Bang.Interface.Base
+import           Bang.Music.Class
+import           Bang.Music.Transform
+import           Data.Foldable        (foldMap)
 
 -- |Infix operator for `cappend`
 infixr 6 ><
-(><) :: Music dur a -> Music dur a -> Music dur a
+(><) :: Music a -> Music a -> Music a
 (><) = cappend
 
 infixr 0 !>
 -- |Set the `Tempo` of a composition (default 1)
--- 
+--
 --  Example (play 4 bass drum hits at double speed):
 --
 -- > 2 !> (4 #> bd)
-(!>) :: Rational -> Music a b -> Music a b
+(!>) :: Rational -> Music a -> Music a
 (!>) = tempo
 
 infixr 1 #>
@@ -38,43 +36,44 @@ infixr 1 #>
 -- Example (play a bass drum twice):
 --
 -- > 2 #> bd
-(#>) :: Num a => Int -> Music a b -> Music a b
+(#>) :: Int -> Music a -> Music a
 (#>) = repl
 
 infixl 1 >>~
 -- |Map a function over a list of compositions and sequentially compose them.
 -- Note: This is just 'foldMap' specialized to the list Monoid.
 --
--- Example (play 'sn', 't1' and 't2' all twice): 
+-- Example (play 'sn', 't1' and 't2' all twice):
 --
 -- > (2 #>) >>~ [sn, t1, t2]
 (>>~) :: Monoid b => (a -> b) -> [a] -> b
 (>>~) = foldMap
 
 -- |Infix operator for 'poly'
--- 
+--
 -- Example (A 3\/4 polyrhythm):
 --
 -- > (3, 3 #> bd) ~=~ (4, 4 #> sn)
-(~=~) :: (Dur, Music Dur b) -> (Dur, Music Dur b) -> Music Dur b
+(~=~) :: (Rational, Music b) -> (Rational, Music b) -> Music b
 (~=~) = poly
 
 infixl 2 ~=
 -- |Infix operator for 'fitL'
 --
 -- Example (a 3\/4 polyrhythm with duration 3\/4):
--- 
+--
 -- > (3 #> bd) ~= (4 #> sn)
-(~=) :: Music Dur b -> Music Dur b -> Music Dur b
+(~=) :: Music b -> Music b -> Music b
 (~=) = fitL
 
 infixr 2 =~
+
 -- |Infix operator for 'fitR'
--- 
+--
 -- Example (a 3\/4 polyrhythm with duration 1:
--- 
+--
 -- > (3 #> bd) =~ (4 #> sn)
-(=~) :: Music Dur b -> Music Dur b -> Music Dur b
+(=~) :: Music b -> Music b -> Music b
 (=~) = fitR
 
 infixr 2 ~~
@@ -89,25 +88,25 @@ infixr 2 ~~
 --  , wr
 --  ]
 -- @
-(~~) :: Dur -> Music Dur b -> Music Dur b
+(~~) :: Rational -> Music b -> Music b
 (~~) = withDuration
 
 infixr 2 <<~
 -- |Infix operator for 'takeDur'
 --
 -- Example (Only play 2 bass drum hits):
--- 
+--
 -- > (1/2) <<~ (4 #> bd)
-(<<~) :: Dur -> Music Dur b -> Music Dur b
+(<<~) :: Rational -> Music b -> Music b
 (<<~) = takeDur
 
 infixr 2 ~>>
 -- |Infix operator for 'dropDur'
 --
 -- Example (play 2 closed hi-hats):
--- 
+--
 -- > (1/2) ~>> ( (2 #> bd) <> (2 #> hc) )
-(~>>) :: Dur -> Music Dur b -> Music Dur b
+(~>>) :: Rational -> Music b -> Music b
 (~>>) = dropDur
 
 infixr 2 <@~
@@ -116,7 +115,7 @@ infixr 2 <@~
 -- Example (half rest, then two closed hi-hats):
 --
 -- > (1/2) ~@> ( (2 #> bd) <> (2 #> hc) )
-(~@>) :: Dur -> Music Dur b -> Music Dur b
+(~@>) :: Rational -> Music b -> Music b
 (~@>) = hushFor
 
 infixr 2 ~@>
@@ -125,12 +124,12 @@ infixr 2 ~@>
 -- Example (two bass drum hits, then a half rest):
 --
 -- > (1/2) <@~ ( (2 #> bd) <> (2 #> hc) )
-(<@~) :: Dur -> Music Dur b -> Music Dur b
+(<@~) :: Rational -> Music b -> Music b
 (<@~) = hushFrom
 
 infixr 0 <!>
 -- |Infix operator for 'normalize'
--- 
+--
 -- Example (Play 12 bass drum hits, then 4 closed hi-hats, then 3 snares, each within a single measure's time):
 --
 -- @
@@ -140,13 +139,13 @@ infixr 0 <!>
 --   , 3  #> sn
 --   ]
 -- @
-(<!>) :: Dur -> [Music Dur b] -> Music Dur b
+(<!>) :: Rational -> [Music b] -> Music b
 (<!>) = normalize
 
 infixr 0 >!<
 -- |Infix operator for 'normalizeC'
--- 
--- Example: (Play 12 bass drum hits, then 4 closed hi-hats, then 3 snares, 
+--
+-- Example: (Play 12 bass drum hits, then 4 closed hi-hats, then 3 snares,
 -- all concurrently within a single measure's time):
 --
 -- @
@@ -156,5 +155,5 @@ infixr 0 >!<
 --   , 3  #> sn
 --   ]
 -- @
-(>!<) :: Dur -> [Music Dur b] -> Music Dur b
+(>!<) :: Rational -> [Music b] -> Music b
 (>!<) = normalizeC

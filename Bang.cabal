@@ -1,43 +1,50 @@
-name:                Bang
-version:             0.1.1.2
-synopsis:            A Drum Machine DSL for Haskell
-description:
-  This library consists of a DSL for piecing together drum compositions. It uses a MIDI backend
-  and is only currently available for use on Mac OSX. Much of the library was inspired by previous work done by Yale's
-  @<http://haskell.cs.yale.edu/euterpea/ Euterpea>@ project and Paul Hudak\'s @<http://cpsc.yale.edu/sites/default/files/files/tr1259.pdf paper>@.
-homepage:            https://github.com/5outh/Bang/
-license:             MIT
-license-file:        LICENSE
-author:              Benjamin Kovach
-maintainer:          bkovach13@gmail.com
--- copyright:
-category:            Sound
-build-type:          Simple
-extra-source-files:  README.md
-cabal-version:       >=1.10
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.31.1.
+--
+-- see: https://github.com/sol/hpack
+--
+-- hash: 2817f0d6ec1f9ebd052c340c331fe9c506201f88df9a5cea106102828e610430
+
+name:           Bang
+version:        0.2.0.0
+synopsis:       A Drum Machine DSL for Haskell
+description:    This library consists of a DSL for piecing together drum compositions.
+category:       Music
+homepage:       https://github.com/5outh/Bang#readme
+bug-reports:    https://github.com/5outh/Bang/issues
+maintainer:     Benjamin Kovach <bkovach13@gmail.com>
+license:        MIT
+license-file:   LICENSE
+build-type:     Simple
+
+source-repository head
+  type: git
+  location: https://github.com/5outh/Bang
 
 library
-  exposed-modules:     Bang,
-                       Bang.Interface,
-                       Bang.Interface.Base,
-                       Bang.Interface.Drum,
-                       Bang.Music,
-                       Bang.Music.Class,
-                       Bang.Music.Operators,
-                       Bang.Music.Transform,
-                       Bang.Experimental.Live,
-                       Bang.Experimental.SequentialDo,
-                       Bang.Experimental.ConcurrentDo
-
-  other-modules:       Bang.Interpreter
-
-  build-depends:       base,
-                       mtl,
-                       transformers,
-                       bifunctors,
-                       stm,
-                       hmidi,
-                       time
-
-  hs-source-dirs:      src
-  default-language:    Haskell2010
+  exposed-modules:
+      Bang
+      Bang.Experimental.SequentialDo
+      Bang.Interface
+      Bang.Interface.Base
+      Bang.Interface.Drum
+      Bang.Interpreter
+      Bang.Music
+      Bang.Music.Class
+      Bang.Music.Operators
+      Bang.Music.Transform
+  other-modules:
+      Paths_Bang
+  hs-source-dirs:
+      src
+  ghc-options: -Wall
+  build-depends:
+      base
+    , bifunctors
+    , hmidi
+    , mtl
+    , stm
+    , time
+    , transformers
+  default-language: Haskell2010

@@ -1,30 +1,27 @@
 module Bang.Interpreter where
 
-import Bang.Music.Class
-import Bang.Interface.Drum
+import           Bang.Interface.Drum
+import           Bang.Music.Class
 
-import System.MIDI
-import Data.Bifunctor
-import Data.Ratio
-import Data.Monoid
+import           Data.Ratio
+import           System.MIDI
 
-toList :: Music Dur PercussionSound -> [MidiEvent]
+toList :: Music PercussionSound -> [MidiEvent]
 toList m = map drumToMidiEvent (interpret m)
 
-merge :: Ord d => [Primitive d a] -> [Primitive d a] -> [Primitive d a]
+interpret :: Music a -> [Primitive a]
+interpret = go 0
+ where
+  go d (a :+: b                ) = go d a `mappend` go (d + musicDuration a) b
+  go d (a :=: b                ) = go d a `merge` go d b
+  go d (Prim n@(Note _ _)      ) = [n { duration = d }]
+  go _ (Prim (  Rest _  )      ) = []
+  go d (Modify (Tempo      a) m) = go d (mapMusicDuration (* a) m)
+  go d (Modify (BPM        n) m) = go d (mapMusicDuration (* (240000 % n)) m)
+  go d (Modify (Instrument _) m) = go d m
+
+merge :: [Primitive a] -> [Primitive a] -> [Primitive a]
 merge [] ys = ys
 merge xs [] = xs
-merge (a:xs) (b:ys)
-  | dur a <= dur b = a : merge xs (b:ys)
-  | otherwise = b : merge (a:xs) ys
-
-interpret :: Music Dur PercussionSound -> [Primitive Dur PercussionSound]
-interpret = go 0
-  where go d (a :+: b) = go d a `mappend` go (d + duration a) b
-        go d (a :=: b) = go d a `merge`   go d b
-        go d (Prim n@(Note _ _))       = [n{dur = d}]
-        go d (Prim n@(Rest _))         = []
-        go d (Modify (Tempo a) m)      = go d (first (*a) m)
-        go d (Modify (BPM n)   m)      = go d (first (* (240000 % n)) m) -- breaks down when bpm has already been set
-        go d (Modify (Instrument _) m) = go d m -- @TODO
-
+merge (a : xs) (b : ys) | duration a <= duration b = a : merge xs (b : ys)
+                        | otherwise                = b : merge (a : xs) ys

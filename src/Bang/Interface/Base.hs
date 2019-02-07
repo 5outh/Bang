@@ -11,116 +11,114 @@ This module exports a number of utilities for constructing primitive notes, rest
 -}
 module Bang.Interface.Base where
 
-import Bang.Music.Class
-import Data.Monoid
-import Data.Ratio
+import           Bang.Music.Class
 
 -- | 'Rest' for a given duration.
-rest :: Dur -> Music Dur a
+rest :: Rational -> Music a
 rest d = Prim (Rest d)
 
 -- | Convenience constructor for single 'Note's
-note :: Dur -> a -> Music Dur a
+note :: Rational -> a -> Music a
 note d x = Prim (Note d x)
 
 -- | Set the bpm of a composition
-bpm :: Integer -> Music a b -> Music a b
+bpm :: Integer -> Music b -> Music b
 bpm n = Modify (BPM n)
 
 -- | Set the tempo of a composition
-tempo :: Rational -> Music a b -> Music a b
-tempo n = Modify (Tempo (1/n))
+tempo :: Rational -> Music b -> Music b
+tempo n = Modify (Tempo (1 / n))
 
 -- | Set the time signature of a composition
 -- @n@ is the beat unit, @d@ is the number of beats per measure.
 -- For example, @ts 4 4 ==@ Common time
-ts :: Rational -> Rational -> Music a b -> Music a b
-ts n d = Modify (Tempo (d/n))
+ts :: Rational -> Rational -> Music b -> Music b
+ts n d = Modify (Tempo (d / n))
 
 -- | Quadruple the tempo of a composition.
-quad :: Music a b -> Music a b
+quad :: Music b -> Music b
 quad = tempo 4
 
 -- | Double the tempo of a composition.
-double :: Music a b -> Music a b
+double :: Music b -> Music b
 double = tempo 2
 
 -- | Set the tempo of a composition to 1 (default, typically idempotent).
-normal :: Music a b -> Music a b
+normal :: Music b -> Music b
 normal = tempo 1
 
 -- | Half the tempo of a composition.
-half :: Music a b -> Music a b
-half = tempo (1/2)
+half :: Music b -> Music b
+half = tempo (1 / 2)
 
 -- | Quarter the tempo of a composition.
-quarter :: Music a b -> Music a b
-quarter = tempo (1/4)
+quarter :: Music b -> Music b
+quarter = tempo (1 / 4)
 
 -- | Convenience constructor for smashing `n` values into a single 1-duration measure.
-tuplets :: Rational -> Music a b -> Music a b
-tuplets n = tempo (n/4)
+tuplets :: Rational -> Music b -> Music b
+tuplets n = tempo (n / 4)
 
 -- | Play 3 notes per measure.
-triplets :: Music a b -> Music a b
+triplets :: Music b -> Music b
 triplets = tuplets 3
 
 -- | Play 5 notes per measure.
-quintuplets :: Music a b -> Music a b
+quintuplets :: Music b -> Music b
 quintuplets = tuplets 5
 
 -- | Sixteenth rest
-sr :: Music Dur a
-sr = rest (1/16)
+sr :: Music a
+sr = rest (1 / 16)
 
 -- | Eighth rest
-er :: Music Dur a
-er = rest (1/8)
+er :: Music a
+er = rest (1 / 8)
 
 -- | Quarter rest
-qr :: Music Dur a
-qr = rest (1/4)
+qr :: Music a
+qr = rest (1 / 4)
 
 -- | Half rest
-hr :: Music Dur a
-hr = rest (1/2)
+hr :: Music a
+hr = rest (1 / 2)
 
 -- | Whole rest
-wr :: Music Dur a
+wr :: Music a
 wr = rest 1
 
 -- Exported separately because it'll be nice to have for Drum
-dots :: Int -> Dur
+dots :: Int -> Rational
 dots n = 2 - (1 / (2 ^ n))
 
-dottedRest :: Int -> Dur -> Music Dur a
+dottedRest :: Int -> Rational -> Music a
 dottedRest n d = rest (d * (dots n))
 
 -- | Shorthand for @dottedRest@
-dr :: Int -> Dur -> Music Dur a
+dr :: Int -> Rational -> Music a
 dr = dottedRest
 
 -- | Constructor for a singly-dotted rest
-oneDotRest :: Dur -> Music Dur a
+oneDotRest :: Rational -> Music a
 oneDotRest = dottedRest 1
 
 -- | Eighth Dotted Rest
-edr :: Music Dur a
-edr = oneDotRest (1/8)
+edr :: Music a
+edr = oneDotRest (1 / 8)
 
 -- | Quarter Dotted Rest
-qdr :: Music Dur a
-qdr = oneDotRest (1/4)
+qdr :: Music a
+qdr = oneDotRest (1 / 4)
 
 -- | Half Dotted Rest
-hdr :: Music Dur a
-hdr = oneDotRest (1/2)
+hdr :: Music a
+hdr = oneDotRest (1 / 2)
 
 -- | Whole Dotted Rest
-wdr :: Music Dur a
+wdr :: Music a
 wdr = oneDotRest 1
 
--- |Sequence `k` compositions together without the need for lists. 
+-- |Sequence `k` compositions together without the need for lists.
 -- `m` corresponds to `m` in `mappend`, `mconcat`, etc.
 m2 :: Monoid a => a -> a -> a
 m2 a b = a <> b
@@ -131,7 +129,7 @@ m4 a b c d = mconcat [a, b, c, d]
 m5 :: Monoid a => a -> a -> a -> a -> a -> a
 m5 a b c d e = mconcat [a, b, c, d, e]
 m6 :: Monoid a => a -> a -> a -> a -> a -> a -> a
-m6 a b c d e f =  mconcat [a, b, c, d, e, f]
+m6 a b c d e f = mconcat [a, b, c, d, e, f]
 m7 :: Monoid a => a -> a -> a -> a -> a -> a -> a -> a
 m7 a b c d e f g = mconcat [a, b, c, d, e, f, g]
 m8 :: Monoid a => a -> a -> a -> a -> a -> a -> a -> a -> a
@@ -147,40 +145,88 @@ m12 a b c d e f g h i j k l = mconcat [a, b, c, d, e, f, g, h, i, j, k, l]
 
 -- |Play `k` compositions concurrently without the need for lists.
 -- `c` corresponds to `c` in `cappend`, `cconcat`, etc.
-c2 :: Num d => Music d a -> Music d a -> Music d a
+c2 :: Music a -> Music a -> Music a
 c2 a b = a <> b
-c3 :: Num d => Music d a -> Music d a -> Music d a -> Music d a
+c3 :: Music a -> Music a -> Music a -> Music a
 c3 a b c = cconcat [a, b, c]
-c4 :: Num d => Music d a -> Music d a -> Music d a -> Music d a 
-            -> Music d a
+c4 :: Music a -> Music a -> Music a -> Music a -> Music a
 c4 a b c d = cconcat [a, b, c, d]
-c5 :: Num d => Music d a -> Music d a -> Music d a -> Music d a 
-              -> Music d a -> Music d a
+c5 :: Music a -> Music a -> Music a -> Music a -> Music a -> Music a
 c5 a b c d e = cconcat [a, b, c, d, e]
-c6 :: Num d => Music d a -> Music d a -> Music d a -> Music d a 
-            -> Music d a -> Music d a -> Music d a
-c6 a b c d e f =  cconcat [a, b, c, d, e, f]
-c7 :: Num d => Music d a -> Music d a -> Music d a -> Music d a 
-            -> Music d a -> Music d a -> Music d a -> Music d a
+c6 :: Music a -> Music a -> Music a -> Music a -> Music a -> Music a -> Music a
+c6 a b c d e f = cconcat [a, b, c, d, e, f]
+c7
+  :: Music a
+  -> Music a
+  -> Music a
+  -> Music a
+  -> Music a
+  -> Music a
+  -> Music a
+  -> Music a
 c7 a b c d e f g = cconcat [a, b, c, d, e, f, g]
-c8 :: Num d => Music d a -> Music d a -> Music d a -> Music d a 
-            -> Music d a -> Music d a -> Music d a -> Music d a 
-            -> Music d a
+c8
+  :: Music a
+  -> Music a
+  -> Music a
+  -> Music a
+  -> Music a
+  -> Music a
+  -> Music a
+  -> Music a
+  -> Music a
 c8 a b c d e f g h = cconcat [a, b, c, d, e, f, g, h]
-c9 :: Num d => Music d a -> Music d a -> Music d a -> Music d a 
-            -> Music d a -> Music d a -> Music d a -> Music d a 
-            -> Music d a -> Music d a
+c9
+  :: Music a
+  -> Music a
+  -> Music a
+  -> Music a
+  -> Music a
+  -> Music a
+  -> Music a
+  -> Music a
+  -> Music a
+  -> Music a
 c9 a b c d e f g h i = cconcat [a, b, c, d, e, f, g, h, i]
-c10 :: Num d => Music d a -> Music d a -> Music d a -> Music d a 
-             -> Music d a -> Music d a -> Music d a -> Music d a 
-             -> Music d a -> Music d a -> Music d a
+c10
+  :: Music a
+  -> Music a
+  -> Music a
+  -> Music a
+  -> Music a
+  -> Music a
+  -> Music a
+  -> Music a
+  -> Music a
+  -> Music a
+  -> Music a
 c10 a b c d e f g h i j = cconcat [a, b, c, d, e, f, g, h, i, j]
-c11 :: Num d => Music d a -> Music d a -> Music d a -> Music d a 
-             -> Music d a -> Music d a -> Music d a -> Music d a 
-             -> Music d a -> Music d a -> Music d a -> Music d a
+c11
+  :: Music a
+  -> Music a
+  -> Music a
+  -> Music a
+  -> Music a
+  -> Music a
+  -> Music a
+  -> Music a
+  -> Music a
+  -> Music a
+  -> Music a
+  -> Music a
 c11 a b c d e f g h i j k = cconcat [a, b, c, d, e, f, g, h, i, j, k]
-c12 :: Num d => Music d a -> Music d a -> Music d a -> Music d a 
-             -> Music d a -> Music d a -> Music d a -> Music d a 
-             -> Music d a -> Music d a -> Music d a -> Music d a 
-             -> Music d a
+c12
+  :: Music a
+  -> Music a
+  -> Music a
+  -> Music a
+  -> Music a
+  -> Music a
+  -> Music a
+  -> Music a
+  -> Music a
+  -> Music a
+  -> Music a
+  -> Music a
+  -> Music a
 c12 a b c d e f g h i j k l = cconcat [a, b, c, d, e, f, g, h, i, j, k, l]
